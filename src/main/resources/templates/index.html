@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Debris Tracker - Solar View</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: black; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.157.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 5;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+    scene.add(ambientLight);
+
+    const sunLight = new THREE.PointLight(0xffffff, 2);
+    sunLight.position.set(10, 10, 10);
+    scene.add(sunLight);
+
+    const loader = new THREE.TextureLoader();
+
+    // ✅ Load working starfield background
+    loader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/cube/space/px.jpg',
+        function () {
+            const starTexture = loader.load("https://raw.githubusercontent.com/marwanhawari/threejs-textures/main/stars/starfield.png");
+            scene.background = starTexture;
+        },
+        undefined,
+        function (err) {
+            console.error('Starfield background load error:', err);
+        }
+    );
+
+    // Load Earth
+    loader.load('https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg', function (earthTexture) {
+        const earthGeo = new THREE.SphereGeometry(1, 64, 64);
+        const earthMat = new THREE.MeshPhongMaterial({ map: earthTexture });
+        const earth = new THREE.Mesh(earthGeo, earthMat);
+        scene.add(earth);
+
+        // Load Mars
+        loader.load('https://threejs.org/examples/textures/mars_1k_color.jpg', function (marsTexture) {
+            const marsGeo = new THREE.SphereGeometry(0.53, 64, 64);
+            const marsMat = new THREE.MeshPhongMaterial({ map: marsTexture });
+            const mars = new THREE.Mesh(marsGeo, marsMat);
+            mars.position.set(3, 0, -2);
+            scene.add(mars);
+
+            // Animate once everything is loaded
+            animate(earth, mars);
+        });
+    });
+
+    function animate(earth, mars) {
+        function loop() {
+            requestAnimationFrame(loop);
+            earth.rotation.y += 0.001;
+            mars.rotation.y += 0.0007;
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        loop();
+    }
+
+    // Resize handler
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+</script>
+
+</body>
+</html>
