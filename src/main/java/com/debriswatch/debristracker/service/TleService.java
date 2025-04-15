@@ -51,13 +51,14 @@ public class TleService {
             String tleJson = response.body();
             List<TleData> tleDataList = parseTleJson(tleJson);
             tleRepository.saveAll(tleDataList);
+            System.out.println(tleJson);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private List<TleData> parseTleJson(String tleJson) throws Exception {
+    List<TleData> parseTleJson(String tleJson) throws Exception {
         // Configure the ObjectMapper to handle the date format
         objectMapper.findAndRegisterModules();
 
@@ -68,8 +69,8 @@ public class TleService {
         for (TleData tleData : tleDataList) {
             if (tleData.getEpoch() != null ) {
                 // Convert the String epoch to LocalDateTime if needed
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd ");
-                LocalDateTime epoch = LocalDateTime.parse(tleData.getEpoch(), formatter);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd yyyy-MM-dd HH:mm:ss");
+                LocalDateTime epoch = LocalDateTime.parse(tleData.getEpoch().toString(), formatter);//fixed
                 tleData.setEpoch(epoch);
             }
         }

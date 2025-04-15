@@ -4,7 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.Setter; 
 import org.springframework.data.annotation.Id;
 
 import java.time.LocalDateTime;
@@ -25,7 +25,7 @@ public class TleData {
     private String objectType;
     private String classificationType;
     private String intldes;
-    private LocalDateTime epoch;
+    private LocalDateTime epoch;//The epoch is the precise timestamp (date + time) when a satellite's orbital elements (li
     private long epochMicroseconds;
     private double meanMotion;
     private double eccentricity;
