@@ -5,9 +5,8 @@ import lombok.Data;
 
 @Entity
 
-public class Satellite extends TleData {
-    public Satellite(){
+public class RocketBody extends TleData {
+    public RocketBody(){
         super();
     }
 }
-
