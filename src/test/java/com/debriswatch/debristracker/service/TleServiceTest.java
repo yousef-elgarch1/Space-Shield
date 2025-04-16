@@ -36,7 +36,7 @@ void testFetchAndProcessTleData_shouldSaveToDatabase() {
         // Mock result
         TleData tle = new TleData();
         tle.setObjectName("ISS (ZARYA)");
-        tle.setEpoch(LocalDateTime.of(2024, 4, 10, 15, 0));
+        tle.setEpoch("2024, 4, 10, 15, 0");
         List<TleData> fakeTleList = Collections.singletonList(tle);
 
         // Spy: mock parseTleJson
@@ -47,8 +47,7 @@ void testFetchAndProcessTleData_shouldSaveToDatabase() {
 
         // Verify save
         verify(tleRepository, times(1)).saveAll(argThat(list ->
-            ((List<TleData>) list).size() == 1 && "ISS (ZARYA)".equals(((List<TleData>) list).get(0).getObjectName())
-        ));
+        ((List<TleData>) list).size() == 1 && "ISS (ZARYA)".equals(((List<TleData>) list).get(0).getObjectName())        ));
     } catch (Exception e) {
         e.printStackTrace(); // ← Add this to catch silent failures
         assert false : "Test failed with exception: " + e.getMessage();
