@@ -9,10 +9,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import java.net.http.HttpRequest;
 import jakarta.annotation.PostConstruct;
-
+import org.springframework.scheduling.annotation.Scheduled;
 import java.net.CookieManager;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -24,7 +25,14 @@ import java.util.List;
 //     fetching the tle data for orbits and debris predictions de space track api
 @Service
 public class TleService {
-
+// Every 36 seconds = 100 requests/hour
+// Within Space-Track limit: max 300 req/hour      
+//Limit API queries to less than 30 requests per 1 minute(s) / 300 requests per 1 hour(s) 
+ @Scheduled(fixedRate = (long) (0.6 * 60 * 1000))
+ public void autoUpdateTleData() {
+    System.out.println("🔄 Auto-fetching latest TLE data...");
+    fetchAndProcessTleData(); // your existing method
+}
     @Autowired
     private TleRepository tleRepository;  //repo ajouter
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule()); // For LocalDateTime support
@@ -41,11 +49,11 @@ public class TleService {
     
         try { 
             // manage cookies for the authentification error using cookie handler 
+            //create the client 
      HttpClient client = HttpClient.newBuilder()
     .cookieHandler(new CookieManager())
     .build();
-
-    
+    // authentification request 
             System.out.println("Sending login request...");
             HttpRequest loginRequest = HttpRequest.newBuilder()
                     .uri(URI.create(loginUrl))
@@ -73,7 +81,18 @@ public class TleService {
             System.out.println(" Saving to DB...");
             tleRepository.saveAll(tleDataList);
             System.out.println(" Save complete");
-    
+            // Pseudo logic inside your fetch method
+            /*     for (TleData tle : tleDataList) {
+                Long id = tLong(tle.getObjectId());
+                if (id != null && tleRepository.existsById(id)) {
+                    // TLE entry already exists
+                    System.out.println("✅ TLE already exists with ID: " + id);
+                } else {
+                    // Save or update logic here
+                    tleRepository.save(tle);
+                    System.out.println("➕ New TLE saved with ID: " + id);
+        } } */
+        
         } catch (Exception e) {
             System.err.println(" Error occurred:");
             e.printStackTrace();
@@ -84,5 +103,14 @@ public class TleService {
         objectMapper.findAndRegisterModules(); // Handles LocalDateTime
         return objectMapper.readValue(tleJson, new TypeReference<List<TleData>>() {});
     }
+    public Long tLong(String string) {
+        try {
+            return Long.parseLong(string);
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid ID: " + string);
+            return null;
+        }
+    }
+    
     
 }
