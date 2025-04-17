@@ -1,0 +1,3 @@
+[submodule "SpaceShield-Front"]
+	path = SpaceShield-Front
+	url = https://github.com/yousef-elgarch1/space-debris-sentinel-alert
