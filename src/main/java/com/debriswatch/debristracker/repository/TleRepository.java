@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface TleRepository extends JpaRepository<TleData, Long> {
     // Add custom query methods here if needed
-    List<TleData> findByObjectType(String objectType);
+    boolean findByObjectType(String objectType);
 }
