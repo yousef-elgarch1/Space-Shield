@@ -69,7 +69,7 @@ private TleRepository tleRepository;
         final String password = dotenv.get("SPACE_TRACK_PASSWORD");
        
         String loginUrl = "https://www.space-track.org/ajaxauth/login";
-        String tleUrl = "https://www.space-track.org/basicspacedata/query/class/tle_latest/limit/100/format/json";
+        String tleUrl = "https://www.space-track.org/basicspacedata/query/class/tle_latest/limit/206/format/json";
     
         try { 
 //                  manage cookies for the authentification error using cookie handler 
@@ -106,7 +106,7 @@ private TleRepository tleRepository;
             tleRepository.saveAll(tleDataList);
             System.out.println(" Save complete");
             
-        
+        // to be changed 
           for (TleData tle : tleDataList) {
               String type=tle.getObjectType().toUpperCase();
 
@@ -124,7 +124,7 @@ private TleRepository tleRepository;
             System.err.println(" Error occurred:");
             e.printStackTrace();
         }
-    }
+    } 
     
     List<TleData> parseTleJson(String tleJson) throws Exception {
         objectMapper.findAndRegisterModules(); // Handles LocalDateTime

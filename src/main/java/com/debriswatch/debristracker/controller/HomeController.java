@@ -25,12 +25,10 @@ public class HomeController {
         return "Welcome to Debris Tracker API";
     }
 
-    @GetMapping("/current")
+    @GetMapping("/debris")
     public List<TleData> getCurrentTleData() {
         try {
-
-
-            return tleRepository1.findAll();
+            return tleRepository1.findTleDataByObjectType("DEBRIS");
         } catch (Exception e) {
             e.printStackTrace(); // Ideally replace with logger
             return Collections.emptyList();

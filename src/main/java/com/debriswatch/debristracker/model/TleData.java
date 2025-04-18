@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.Setter; 
 
 import jakarta.persistence.InheritanceType; // ✅ This one is critical
+import jakarta.persistence.Table;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -17,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Getter
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)//inheritance strategie 
+@Table(name = "tle_data")
 public class TleData {
     // Getters and Setters
     
