@@ -7,7 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Inheritance;
 import lombok.Getter;
 import lombok.Setter; 
-import org.springframework.data.annotation.Id;
+
 import jakarta.persistence.InheritanceType; // ✅ This one is critical
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,9 +20,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class TleData {
     // Getters and Setters
     
-    @Id
     @jakarta.persistence.Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+private int idData;
+
+    @JsonProperty("INTLDES")
+    private String intldes;
+    @JsonProperty("ORDINAL")
+
     private int ordinal;
 
     @JsonProperty("COMMENT")
@@ -42,9 +47,6 @@ public class TleData {
 
     @JsonProperty("CLASSIFICATION_TYPE")
     private String classificationType;
-
-    @JsonProperty("INTLDES")
-    private String intldes;
 
     @JsonProperty("EPOCH")
     private String epoch; // Keep as String for now
