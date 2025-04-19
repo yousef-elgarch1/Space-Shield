@@ -98,14 +98,4 @@ public class OrbitService {
         return result;
     }
 
-
-    //  function that calculate in real time orbits and return orbits  data every 60 second
-public List<OrbitPoint> realtime_feedback(){
-
-
-
-    
-    return null;
-    
-}
 }

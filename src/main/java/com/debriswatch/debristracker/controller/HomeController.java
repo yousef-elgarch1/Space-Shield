@@ -35,16 +35,8 @@ public class HomeController {
         }
     }
 
-    @Autowired
-    private OrbitService orbitService;
+  
 
-    @GetMapping("/{id}")
-    public List<OrbitPoint> getOrbit(@PathVariable int id,
-                                     @RequestParam(defaultValue = "180") int durationMinutes) {
-        TleData tle = tleRepository1.findById((long) id)
-                .orElseThrow(() -> new IllegalArgumentException("TLE not found for id: " + id));
 
-        return orbitService.computeOrbitFromTle(tle, durationMinutes);
-    }
 
 }
