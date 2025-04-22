@@ -1,26 +1,36 @@
 package com.debriswatch.debristracker.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Inheritance;
 import lombok.Getter;
 import lombok.Setter; 
-import org.springframework.data.annotation.Id;
+
+import jakarta.persistence.InheritanceType; // ✅ This one is critical
+import jakarta.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.LocalDateTime;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Setter
 @Getter
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)//inheritance strategie 
+@Table(name = "tle_data")
 public class TleData {
     // Getters and Setters
     
-    @Id
     @jakarta.persistence.Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
+private int idData;
+
+    @JsonProperty("INTLDES")
+    private String intldes;
+    @JsonProperty("ORDINAL")
+
     private int ordinal;
 
     @JsonProperty("COMMENT")
@@ -40,9 +50,6 @@ public class TleData {
 
     @JsonProperty("CLASSIFICATION_TYPE")
     private String classificationType;
-
-    @JsonProperty("INTLDES")
-    private String intldes;
 
     @JsonProperty("EPOCH")
     private String epoch; // Keep as String for now
@@ -109,7 +116,7 @@ public class TleData {
 
     @JsonProperty("PERIOD")
     private double period;
-
+    @Column(nullable = true)
     @JsonProperty("APOGEE")
     private double apogee;
 
@@ -120,4 +127,38 @@ public class TleData {
     private String decayed;
 
     // Getters and setters
+    public void copyFrom(TleData tle) {
+        this.setComment(tle.getComment());
+        this.setOriginator(tle.getOriginator());
+        this.setNoradCatId(tle.getNoradCatId());
+        this.setObjectName(tle.getObjectName());
+        this.setObjectType(tle.getObjectType());
+        this.setClassificationType(tle.getClassificationType());
+        this.setIntldes(tle.getIntldes());
+        this.setEpoch(tle.getEpoch());
+        this.setEpochMicroseconds(tle.getEpochMicroseconds());
+        this.setMeanMotion(tle.getMeanMotion());
+        this.setEccentricity(tle.getEccentricity());
+        this.setInclination(tle.getInclination());
+        this.setRaOfAscNode(tle.getRaOfAscNode());
+        this.setArgOfPericenter(tle.getArgOfPericenter());
+        this.setMeanAnomaly(tle.getMeanAnomaly());
+        this.setEphemerisType(tle.getEphemerisType());
+        this.setElementSetNo(tle.getElementSetNo());
+        this.setRevAtEpoch(tle.getRevAtEpoch());
+        this.setBstar(tle.getBstar());
+        this.setMeanMotionDot(tle.getMeanMotionDot());
+        this.setMeanMotionDdot(tle.getMeanMotionDdot());
+        this.setFile(tle.getFile());
+        this.setTleLine0(tle.getTleLine0());
+        this.setTleLine1(tle.getTleLine1());
+        this.setTleLine2(tle.getTleLine2());
+        this.setObjectId(tle.getObjectId());
+        this.setObjectNumber(tle.getObjectNumber());
+        this.setSemimajorAxis(tle.getSemimajorAxis());
+        this.setPeriod(tle.getPeriod());
+        this.setApogee(tle.getApogee());//set apogee
+        this.setPerigee(tle.getPerigee());
+        this.setDecayed(tle.getDecayed());
+    }
 }

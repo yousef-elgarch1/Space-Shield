@@ -3,8 +3,12 @@ package com.debriswatch.debristracker.controller;
 import java.util.Collections;
 import java.util.List;
 
+import com.debriswatch.debristracker.model.OrbitPoint;
+import com.debriswatch.debristracker.service.OrbitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.debriswatch.debristracker.model.TleData;
@@ -21,15 +25,18 @@ public class HomeController {
         return "Welcome to Debris Tracker API";
     }
 
-    @GetMapping("/current")
+    @GetMapping("/debris")
     public List<TleData> getCurrentTleData() {
         try {
-            
-
-            return tleRepository1.findAll();
+            return tleRepository1.findTleDataByObjectType("DEBRIS");
         } catch (Exception e) {
             e.printStackTrace(); // Ideally replace with logger
             return Collections.emptyList();
         }
     }
+
+  
+
+
+
 }

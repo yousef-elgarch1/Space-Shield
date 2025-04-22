@@ -1,7 +1,13 @@
 package com.debriswatch.debristracker.service;
-
+import io.github.cdimascio.dotenv.Dotenv;
+import com.debriswatch.debristracker.model.Debris;
+import com.debriswatch.debristracker.model.RocketBody;
+import com.debriswatch.debristracker.model.Satellite;
 import com.debriswatch.debristracker.model.TleData;
+import com.debriswatch.debristracker.repository.SatelliteRepository;
 import com.debriswatch.debristracker.repository.TleRepository;
+import com.debriswatch.debristracker.repository.DebrisRepository;
+import com.debriswatch.debristracker.repository.RocketBodyRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -25,6 +31,16 @@ import java.util.List;
 //     fetching the tle data for orbits and debris predictions de space track api
 @Service
 public class TleService {
+    public  TleService(){
+        System.out.println("Singleton instance created");  
+    }
+    @Autowired
+    public TleService(SatelliteRepository satelliteRepository ,RocketBodyRepository rocketBodyRepository,DebrisRepository debrisRepository ){
+  this.debrisRepository=debrisRepository;
+  this.rocketBodyRepository=rocketBodyRepository;
+  this.satelliteRepository=satelliteRepository;
+    }
+  
 // Every 36 seconds = 100 requests/hour
 // Within Space-Track limit: max 300 req/hour      
 //Limit API queries to less than 30 requests per 1 minute(s) / 300 requests per 1 hour(s) 
@@ -33,8 +49,14 @@ public class TleService {
     System.out.println("🔄 Auto-fetching latest TLE data...");
     fetchAndProcessTleData(); // your existing method
 }
-    @Autowired
-    private TleRepository tleRepository;  //repo ajouter
+@Autowired
+private SatelliteRepository satelliteRepository;
+@Autowired
+private RocketBodyRepository rocketBodyRepository;
+@Autowired
+private DebrisRepository debrisRepository;
+@Autowired
+private TleRepository tleRepository;
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule()); // For LocalDateTime support
     @PostConstruct
     public void init() {
@@ -42,18 +64,20 @@ public class TleService {
         fetchAndProcessTleData();
     }
     public void fetchAndProcessTleData() {
-        String username = "yousseftouzani2003@gmail.com";
-        String password = "Projetdevhamlaoui2025!";
+        final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+        final String username = dotenv.get("SPACE_TRACK_USERNAME");
+        final String password = dotenv.get("SPACE_TRACK_PASSWORD");
+       
         String loginUrl = "https://www.space-track.org/ajaxauth/login";
-        String tleUrl = "https://www.space-track.org/basicspacedata/query/class/tle_latest/limit/10/format/json";
+        String tleUrl = "https://www.space-track.org/basicspacedata/query/class/tle_latest/limit/100/format/json";
     
         try { 
-            // manage cookies for the authentification error using cookie handler 
-            //create the client 
+//                  manage cookies for the authentification error using cookie handler 
+//                  Create the client 
      HttpClient client = HttpClient.newBuilder()
     .cookieHandler(new CookieManager())
     .build();
-    // authentification request 
+//                   Authentification request 
             System.out.println("Sending login request...");
             HttpRequest loginRequest = HttpRequest.newBuilder()
                     .uri(URI.create(loginUrl))
@@ -81,23 +105,26 @@ public class TleService {
             System.out.println(" Saving to DB...");
             tleRepository.saveAll(tleDataList);
             System.out.println(" Save complete");
-            // Pseudo logic inside your fetch method
-            /*     for (TleData tle : tleDataList) {
-                Long id = tLong(tle.getObjectId());
-                if (id != null && tleRepository.existsById(id)) {
-                    // TLE entry already exists
-                    System.out.println("✅ TLE already exists with ID: " + id);
-                } else {
-                    // Save or update logic here
-                    tleRepository.save(tle);
-                    System.out.println("➕ New TLE saved with ID: " + id);
-        } } */
-        
-        } catch (Exception e) {
+            
+        // to be changed 
+          for (TleData tle : tleDataList) {
+              String type=tle.getObjectType().toUpperCase();
+
+          if(type.equals("DEBRIS")){
+               Debris debris=new Debris(tle);
+                debrisRepository.save(debris);
+          }else if(type.equals("ROCKET BODY")) {
+              RocketBody rocketBody = new RocketBody(tle);
+              rocketBodyRepository.save(rocketBody);
+          }else {
+          Satellite satellite=new Satellite(tle);
+           satelliteRepository.save(satellite);
+            }}
+         } catch (Exception e) {
             System.err.println(" Error occurred:");
             e.printStackTrace();
         }
-    }
+    } 
     
     List<TleData> parseTleJson(String tleJson) throws Exception {
         objectMapper.findAndRegisterModules(); // Handles LocalDateTime
