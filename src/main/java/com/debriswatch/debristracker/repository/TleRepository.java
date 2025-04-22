@@ -13,6 +13,8 @@ public interface TleRepository extends JpaRepository<TleData, Long> {
 
     @Query("SELECT t FROM TleData t WHERE t.objectType = :object_type")
     List<TleData> findTleDataByObjectType(@Param("object_type") String object_type);
-    TleData findTopByOrderByIdDataDesc();// corrected 
+
+    TleData findTopByOrderByIdDataDesc();   //   Corrected 
+    
 }
 

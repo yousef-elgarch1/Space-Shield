@@ -14,26 +14,24 @@ import org.orekit.propagation.analytical.tle.TLEPropagator;
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.Constants;
 import org.orekit.utils.PVCoordinates;
-import org.orekit.utils.TimeStampedPVCoordinates;
-import org.springframework.stereotype.Service;
 import org.orekit.utils.IERSConventions;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class OrbitService {
 
     private final TleRepository tleRepository;
-
+@Autowired
     public OrbitService(TleRepository tleRepository) {
         this.tleRepository = tleRepository;
     }
 
-    // Existing method to compute lat/lon/alt
-    public List<OrbitPoint> computeOrbitFromTle(TleData tle, int durationMinutes) {
-        List<OrbitPoint> result = new ArrayList<>();
-
+    /**
+     * Computes the current geodetic (latitude, longitude, altitude) position
+     * of a space object based on its TLE using the current system time.
+     */
+    public OrbitPoint computeCurrentOrbitPoint(TleData tle) {
         try {
             TLE orekitTle = new TLE(tle.getTleLine1(), tle.getTleLine2());
             TLEPropagator propagator = TLEPropagator.selectExtrapolator(orekitTle);
@@ -46,56 +44,46 @@ public class OrbitService {
                     earthFrame
             );
 
-            AbsoluteDate start = orekitTle.getDate();
+            AbsoluteDate now = new AbsoluteDate(); // Real-time timestamp
+            PVCoordinates pv = propagator.propagate(now).getPVCoordinates(inertialFrame);
+            GeodeticPoint point = earth.transform(pv.getPosition(), inertialFrame, now);
 
-            for (int i = 0; i < durationMinutes; i += 10) {
-                AbsoluteDate step = start.shiftedBy(i * 60.0);
-                PVCoordinates pv = propagator.propagate(step).getPVCoordinates(inertialFrame);
-                GeodeticPoint point = earth.transform(pv.getPosition(), inertialFrame, step);
-
-                result.add(new OrbitPoint(
-                        Math.toDegrees(point.getLatitude()),
-                        Math.toDegrees(point.getLongitude()),
-                        point.getAltitude()
-                ));
-            }
+            return new OrbitPoint(
+                    Math.toDegrees(point.getLatitude()),
+                    Math.toDegrees(point.getLongitude()),
+                    point.getAltitude()
+            );
 
         } catch (Exception e) {
-            System.err.println("Failed to compute orbit for NORAD ID: " + tle.getNoradCatId());
+            System.err.println("Failed to compute current orbit for NORAD ID: " + tle.getNoradCatId());
             e.printStackTrace();
+            return null;
         }
-
-        return result;
     }
 
-    //  Returns full 3D (X, Y, Z) coordinates
-    public List<Vector3DPoint> compute3DOrbitFromTle(TleData tle, int durationMinutes) {
-        List<Vector3DPoint> result = new ArrayList<>();
-
+    /**
+     * Computes the current 3D (X, Y, Z) inertial position in meters
+     * of a space object based on its TLE using the current system time.
+     */
+    public Vector3DPoint computeCurrent3DPosition(TleData tle) {
         try {
             TLE orekitTle = new TLE(tle.getTleLine1(), tle.getTleLine2());
             TLEPropagator propagator = TLEPropagator.selectExtrapolator(orekitTle);
             Frame inertialFrame = FramesFactory.getEME2000();
-            AbsoluteDate start = orekitTle.getDate();
 
-            for (int i = 0; i < durationMinutes; i += 10) {
-                AbsoluteDate step = start.shiftedBy(i * 60.0);
-                PVCoordinates pv = propagator.propagate(step).getPVCoordinates(inertialFrame);
+            AbsoluteDate now = new AbsoluteDate(); // Real-time timestamp
+            PVCoordinates pv = propagator.propagate(now).getPVCoordinates(inertialFrame);
 
-                // Orekit's vector is in meters
-                result.add(new Vector3DPoint(
-                        pv.getPosition().getX(),
-                        pv.getPosition().getY(),
-                        pv.getPosition().getZ()
-                ));
-            }
+            return new Vector3DPoint(
+                    pv.getPosition().getX(),
+                    pv.getPosition().getY(),
+                    pv.getPosition().getZ()
+            );
 
         } catch (Exception e) {
-            System.err.println("Failed to compute 3D orbit for NORAD ID: " + tle.getNoradCatId());
+            System.err.println("Failed to compute current 3D position for NORAD ID: " + tle.getNoradCatId());
             e.printStackTrace();
+            return null;
         }
-
-        return result;
     }
-
 }
