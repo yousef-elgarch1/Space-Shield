@@ -198,10 +198,10 @@ The resulting JAR file can be deployed to any Java-capable server.
 * Space weather impact analysis
 
 ## Contributors
-* **ELGARCH Youssef** - Backend Development & Orbital Mechanics
-* **IBNOU-KADY Nisrine** - Frontend Development & UI/UX Design
-* **BAZZAOUI Youness** - Data Processing & Visualization
-* **TOUZANI Youssef** - System Architecture & Database Design
+* **ELGARCH Youssef** - Visualization & Frontend Dev
+* **IBNOU-KADY Nisrine** - Data Processign & Alert System 
+* **BAZZAOUI Youness** - System Architecture & Database Design
+* **TOUZANI Youssef** - Backend Development & Orbital Mechanics
 
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
