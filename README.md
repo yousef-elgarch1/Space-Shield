@@ -1,6 +1,8 @@
-# SpaceShield
-
-A comprehensive space debris monitoring and collision prediction system.
+<div align="center">
+  <img src="assets/logo.png" alt="SpaceShield Logo" width="300"/>
+  <h1>SpaceShield</h1>
+  <p>A comprehensive space debris monitoring and collision prediction system</p>
+</div>
 
 ## Overview
 
@@ -185,10 +187,21 @@ The resulting JAR file can be deployed to any Java-capable server.
 * **Audit Logging**: Tracking of critical operations for security oversight
 
 ## Screenshots
+<div align="center">
+  <img src="assets/page1.png" alt="Dashboard" width="800"/>
+  <p><em>Main dashboard showing Earth visualization and orbital objects</em></p>
+</div>
 
-![Dashboard](screenshots/dashboard.png)
-![Monitoring](screenshots/monitoring.png)
-![Statistics](screenshots/statistics.png)
+<div align="center">
+  <img src="assets/alert.png" alt="Monitoring Panel" width="800"/>
+  <p><em>Monitoring panel with detailed object information</em></p>
+</div>
+
+<div align="center">
+  <img src="assets/stats.png" alt="Statistics" width="800"/>
+  <p><em>Statistical analysis of orbital objects</em></p>
+</div>
+
 
 ## Future Plans
 * Mobile application for on-the-go monitoring
