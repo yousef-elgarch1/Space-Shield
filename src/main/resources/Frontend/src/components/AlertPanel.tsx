@@ -4,14 +4,7 @@ import { AlertCircle, Radio, Shield } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
-interface AlertData {
-  id: string;
-  time: string;
-  objectName: string;
-  probability: number;
-  distance: string;
-  severity: 'warning' | 'critical';
-}
+
 
 const mockAlerts: AlertData[] = [
   {
