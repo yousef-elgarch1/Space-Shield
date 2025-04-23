@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
+@DiscriminatorValue("SATELLITE")
 public class Satellite extends TleData {
     public Satellite(){
         super();

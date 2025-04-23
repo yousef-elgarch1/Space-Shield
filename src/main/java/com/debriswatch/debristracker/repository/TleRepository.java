@@ -14,7 +14,16 @@ public interface TleRepository extends JpaRepository<TleData, Long> {
     @Query("SELECT t FROM TleData t WHERE t.objectType = :object_type")
     List<TleData> findTleDataByObjectType(@Param("object_type") String object_type);
 
-    TleData findTopByOrderByIdDataDesc();   //   Corrected 
-    
+    TleData findTopByOrderByIdDataDesc();   
+    @Query(value = """
+    SELECT * FROM (
+        SELECT *, ROW_NUMBER() OVER (PARTITION BY object_name ORDER BY epoch DESC, id_data DESC) AS rn
+        FROM tle_data
+    ) AS ranked
+    WHERE rn = 1
+    ORDER BY epoch DESC
+""", nativeQuery = true)
+List<TleData> findLatestTlePerObjectName();
+
 }
 

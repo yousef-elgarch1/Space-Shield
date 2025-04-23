@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
+@DiscriminatorValue("ROCKET BODY")
 public class RocketBody extends TleData {
     public RocketBody(){
         super();

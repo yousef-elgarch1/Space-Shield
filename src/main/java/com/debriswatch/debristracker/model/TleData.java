@@ -1,13 +1,15 @@
 package com.debriswatch.debristracker.model;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Inheritance;
 import lombok.Getter;
 import lombok.Setter; 
-
+import jakarta.persistence.DiscriminatorType;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.InheritanceType; // ✅ This one is critical
 import jakarta.persistence.Table;
 
@@ -19,6 +21,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Getter
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)//inheritance strategie 
+@DiscriminatorColumn(name = "clazz_", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorValue("TleData")
 @Table(name = "tle_data")
 public class TleData {
     // Getters and Setters

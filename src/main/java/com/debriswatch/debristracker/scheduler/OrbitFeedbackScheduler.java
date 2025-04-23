@@ -5,6 +5,8 @@ import com.debriswatch.debristracker.model.OrbitPoint;
 import com.debriswatch.debristracker.repository.TleRepository;
 import com.debriswatch.debristracker.service.OrbitService;
 
+import java.util.List;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -24,8 +26,8 @@ public class OrbitFeedbackScheduler {
     public void fetchOrbitEveryMinute() {
 
 
-        TleData tle = tleRepository.findTopByOrderByIdDataDesc(); // Fetch most recent TLE
-
+        List<TleData> tleList = tleRepository.findLatestTlePerObjectName(); // Fetch most recent TLE
+for(TleData tle :tleList){
         if (tle != null) {
             OrbitPoint orbit = orbitService.computeCurrentOrbitPoint(tle);
 
@@ -40,5 +42,8 @@ public class OrbitFeedbackScheduler {
         } else {
             System.err.println("No TLE data found in the database.");
         }
+
+
+    }
     }
 }
