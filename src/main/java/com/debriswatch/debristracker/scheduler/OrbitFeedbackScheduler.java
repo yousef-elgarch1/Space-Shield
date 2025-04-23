@@ -21,8 +21,8 @@ public class OrbitFeedbackScheduler {
         this.tleRepository = tleRepository;
     }
 
-    // Runs every 60 seconds
-    @Scheduled(fixedRate = 60000)
+    // Runs every 30 seconds
+    @Scheduled(fixedRate = 30000)
     public void fetchOrbitEveryMinute() {
 
 
@@ -32,7 +32,7 @@ for(TleData tle :tleList){
             OrbitPoint orbit = orbitService.computeCurrentOrbitPoint(tle);
 
             if (orbit != null) {
-                System.out.println("Current Orbit Point:");
+                System.out.println("Current Orbit Point:"+tle.getObjectName()+tle.getObjectId());
                 System.out.println("Lat: " + orbit.getLatitude() +
                                    ", Lon: " + orbit.getLongitude() +
                                    ", Alt: " + orbit.getAltitude() + " meters");
