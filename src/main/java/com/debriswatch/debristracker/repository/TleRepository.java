@@ -2,6 +2,7 @@ package com.debriswatch.debristracker.repository;
 
 import com.debriswatch.debristracker.model.TleData;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.repository.query.Param;
@@ -25,4 +26,10 @@ public interface TleRepository extends JpaRepository<TleData, Long> {
 """, nativeQuery = true)
 List<TleData> findLatestTlePerObjectName();
 
+
+
+// empting the database ! it should be after deleting the rest of the tables due to the inheritance strategy
+@Modifying
+@Query(value = "DELETE FROM tle_data", nativeQuery = true)
+void deleteAllTleData();
 }

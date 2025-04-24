@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -142,6 +143,13 @@ private TleRepository tleRepository;
             return null;
         }
     }
-    
+    @Transactional
+public void clearAllTleRelatedData() {
+    satelliteRepository.deleteAllSatellites();
+    debrisRepository.deleteAllDebris();
+    rocketBodyRepository.deleteAllRocketBodies();
+    tleRepository.deleteAllTleData();
+}
+
     
 }
