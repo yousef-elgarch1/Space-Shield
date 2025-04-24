@@ -26,4 +26,3 @@ public interface TleRepository extends JpaRepository<TleData, Long> {
 List<TleData> findLatestTlePerObjectName();
 
 }
-

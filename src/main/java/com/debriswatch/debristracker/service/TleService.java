@@ -44,13 +44,13 @@ public class TleService {
 // Every 36 seconds = 100 requests/hour
 // Within Space-Track limit: max 300 req/hour      
 //Limit API queries to less than 30 requests per 1 minute(s) / 300 requests per 1 hour(s) 
-
+/* 
  @Scheduled(fixedRate = (long) (0.6 * 60 * 1000))
  public void autoUpdateTleData() {
     System.out.println("🔄 Auto-fetching latest TLE data...");
     fetchAndProcessTleData(); // your existing method
 }
-
+*/
 @Autowired
 private SatelliteRepository satelliteRepository;
 @Autowired
