@@ -14,11 +14,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.debriswatch.debristracker.model.TleData;
+import com.debriswatch.debristracker.repository.DebrisRepository;
+import com.debriswatch.debristracker.repository.RocketBodyRepository;
+import com.debriswatch.debristracker.repository.SatelliteRepository;
 import com.debriswatch.debristracker.repository.TleRepository;
 @RestController
 @RequestMapping("/api/tle")
 public class HomeController {
-
+    @Autowired 
+    private RocketBodyRepository rocketBodyRepository;
+    @Autowired 
+    private DebrisRepository debrisRepository;
+    @Autowired 
+    private SatelliteRepository satelliteRepository;
     @Autowired
     private TleRepository tleRepository;
 
@@ -28,10 +36,21 @@ public class HomeController {
     }
 
     @GetMapping("/by-type")
-    public ResponseEntity<List<TleData>> getTleByType(@RequestParam String type) {
+    public ResponseEntity<List<? extends TleData>> getTleByType(@RequestParam String type) {
         try {
-            List<TleData> results = tleRepository.findTleDataByObjectType(type.toUpperCase());
-            return ResponseEntity.ok(results);
+            String normalized = type.trim().toUpperCase();
+
+            switch (normalized) {
+                case "ROCKET BODY":
+                    return ResponseEntity.ok(rocketBodyRepository.findAll());
+                case "DEBRIS":
+                    return ResponseEntity.ok(debrisRepository.findAll());
+                case "SATELLITE":
+                    return ResponseEntity.ok(satelliteRepository.findAll());
+                default:
+                    return ResponseEntity.badRequest().body(Collections.emptyList());
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body(Collections.emptyList());

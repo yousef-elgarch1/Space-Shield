@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Setter
 @Getter
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)//inheritance strategie 
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)//inheritance strategie 
 @DiscriminatorColumn(name = "clazz_", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue("TleData")
 @Table(name = "tle_data")
