@@ -5,12 +5,15 @@ import com.debriswatch.debristracker.model.OrbitPoint;
 import com.debriswatch.debristracker.model.Vector3DPoint;
 import com.debriswatch.debristracker.repository.TleRepository;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.frames.Frame;
 import org.orekit.frames.FramesFactory;
 import org.orekit.propagation.analytical.tle.TLE;
-import org.orekit.propagation.analytical.tle.TLEPropagator;
+import org.orekit.propagation.analytical.tle.TLEPropagator; 
 import org.orekit.time.AbsoluteDate;
 import org.orekit.utils.Constants;
 import org.orekit.utils.PVCoordinates;
@@ -86,4 +89,59 @@ public class OrbitService {
             return null;
         }
     }
+
+
+    /*
+     * Accepts a TleData object
+     * Computes the satellite’s orbit prediction for 1 to 3 days
+     * Uses a 10-minute step by default
+     */
+     public List<OrbitPoint> predictOrbitForDays(TleData tleData, int days) {
+        List<OrbitPoint> orbitPoints = new ArrayList<>();
+
+        try {
+            TLE tle = new TLE(tleData.getTleLine1(), tleData.getTleLine2());
+
+            TLEPropagator propagator = TLEPropagator.selectExtrapolator(tle);
+
+            // Define the inertial and Earth-fixed frames
+            Frame inertialFrame = FramesFactory.getEME2000();
+            Frame earthFrame = FramesFactory.getITRF(IERSConventions.IERS_2010, true);
+
+            // Define the Earth model (WGS84)
+            OneAxisEllipsoid earth = new OneAxisEllipsoid(
+                    Constants.WGS84_EARTH_EQUATORIAL_RADIUS,
+                    Constants.WGS84_EARTH_FLATTENING,
+                    earthFrame
+            );
+
+            // Start time = TLE epoch
+            AbsoluteDate startDate = tle.getDate();
+
+            // Propagate every 10 minutes over the given number of days
+            int stepSeconds = 600; // 10 minutes
+            int totalSeconds = days * 24 * 3600;
+
+            for (int t = 0; t <= totalSeconds; t += stepSeconds) {
+                AbsoluteDate currentDate = startDate.shiftedBy(t);
+                PVCoordinates pv = propagator.propagate(currentDate).getPVCoordinates(inertialFrame);
+                GeodeticPoint point = earth.transform(pv.getPosition(), inertialFrame, currentDate);
+
+                orbitPoints.add(new OrbitPoint(
+                        Math.toDegrees(point.getLatitude()),
+                        Math.toDegrees(point.getLongitude()),
+                        point.getAltitude()
+                ));
+            }
+
+        } catch (Exception e) {
+            System.err.println("Failed to predict orbit for NORAD ID: " + tleData.getNoradCatId());
+            e.printStackTrace();
+        }
+
+        return orbitPoints;
+    }
+
+
+
 }

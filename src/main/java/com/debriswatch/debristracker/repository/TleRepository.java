@@ -32,4 +32,6 @@ List<TleData> findLatestTlePerObjectName();
 @Modifying
 @Query(value = "DELETE FROM tle_data", nativeQuery = true)
 void deleteAllTleData();
+
+TleData findByNoradCatId(int noradId);
 }

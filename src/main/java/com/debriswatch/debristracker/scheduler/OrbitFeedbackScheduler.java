@@ -22,9 +22,8 @@ public class OrbitFeedbackScheduler {
         this.orbitService = orbitService;
         this.tleRepository = tleRepository;
         this.tleservice=tleservice;
-    }
+    } 
 
-    // Runs every 30 seconds
     public void fetchOrbitEveryMinute() {
 
 try{
