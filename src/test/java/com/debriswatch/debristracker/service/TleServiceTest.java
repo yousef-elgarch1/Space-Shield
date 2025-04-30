@@ -1,18 +1,17 @@
 package com.debriswatch.debristracker.service;
+
+import com.debriswatch.debristracker.model.Satellite;
 import com.debriswatch.debristracker.model.TleData;
-import com.debriswatch.debristracker.repository.TleRepository;
+import com.debriswatch.debristracker.repository.*;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.time.LocalDateTime;
-import java.time.temporal.TemporalAccessor;
 import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -25,33 +24,45 @@ class TleServiceTest {
     @Mock
     private TleRepository tleRepository;
 
+    @Mock
+    private SatelliteRepository satelliteRepository;
+
+    @Mock
+    private DebrisRepository debrisRepository;
+
+    @Mock
+    private RocketBodyRepository rocketBodyRepository;
+
     @BeforeEach
-    void setUp() {
+    void init() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-void testFetchAndProcessTleData_shouldSaveToDatabase() {
-    try {
-        // Mock result
-        TleData tle = new TleData();
-        tle.setObjectName("ISS (ZARYA)");
-        tle.setEpoch("2024, 4, 10, 15, 0");
-        List<TleData> fakeTleList = Collections.singletonList(tle);
+    void fetchAndProcessTleData_runsSuccessfullyAndSaves() {
+        try {
+            // Arrange: Create fake TLE data
+            TleData tle = new TleData();
+            tle.setObjectName("TEST SAT");
+            tle.setObjectType("PAYLOAD"); // triggers Satellite saving
 
-        // Spy: mock parseTleJson
-        doReturn(fakeTleList).when(tleService).parseTleJson(anyString());
+            List<TleData> fakeList = Collections.singletonList(tle);
 
-        // Call method
-        tleService.fetchAndProcessTleData();
+            // Act: Mock parseTleJson to avoid actual API call
+            doReturn(fakeList).when(tleService).parseTleJson(anyString());
 
-        // Verify save
-        verify(tleRepository, times(1)).saveAll(argThat(list ->
-        ((List<TleData>) list).size() == 1 && "ISS (ZARYA)".equals(((List<TleData>) list).get(0).getObjectName())        ));
-    } catch (Exception e) {
-        e.printStackTrace(); // ← Add this to catch silent failures
-        assert false : "Test failed with exception: " + e.getMessage();
+            // Act: Run the method
+            tleService.fetchAndProcessTleData();
+
+            // Assert: Verify DB interaction
+            verify(tleRepository, times(1)).saveAll(anyList());
+            verify(satelliteRepository, times(1)).save(any(Satellite.class));
+            verify(debrisRepository, never()).save(any());
+            verify(rocketBodyRepository, never()).save(any());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            assert false : "Test failed due to exception: " + e.getMessage();
+        }
     }
-}
-
 }

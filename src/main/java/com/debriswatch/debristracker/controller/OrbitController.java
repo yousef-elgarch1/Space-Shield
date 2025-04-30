@@ -15,6 +15,7 @@ import com.debriswatch.debristracker.model.OrbitPoint;
 import com.debriswatch.debristracker.model.TleData;
 import com.debriswatch.debristracker.repository.TleRepository;
 import com.debriswatch.debristracker.service.OrbitService;
+import com.debriswatch.debristracker.service.TleService;
 
 @RestController
 @RequestMapping("/api/orbit")
@@ -22,16 +23,18 @@ public class OrbitController {
 
     private final OrbitService orbitService;
     private final TleRepository tleRepository;
-
-    public OrbitController(OrbitService orbitService, TleRepository tleRepository) {
+    private final TleService tleservice;
+    public OrbitController(OrbitService orbitService, TleRepository tleRepository,TleService tleservice) {
         this.orbitService = orbitService;
         this.tleRepository = tleRepository;
+        this. tleservice= tleservice;
     }
 
     @GetMapping("/realtime")
     public List<OrbitResponseDto> getRealTimeOrbits() {
-        List<TleData> tleList = tleRepository.findLatestTlePerObjectName();
- 
+        tleservice.clearAllTleRelatedData(); // drop all existing data from the databse for optimisation
+        tleservice.fetchAndProcessTleData();   // fetch data and process it 
+        List<TleData> tleList = tleRepository.findLatestTlePerObjectName();   // find latest tle data per object 
         return tleList.stream()
                 .map(tle -> {
                     OrbitPoint point = orbitService.computeCurrentOrbitPoint(tle);
@@ -49,9 +52,5 @@ public class OrbitController {
                 .filter(Objects::nonNull)
                 .toList();
     }
-
-
-
-
 }
 
