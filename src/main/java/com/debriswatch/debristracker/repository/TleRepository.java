@@ -34,4 +34,6 @@ List<TleData> findLatestTlePerObjectName();
 void deleteAllTleData();
 
 TleData findByNoradCatId(int noradId);
+
+TleData findTopByObjectNameOrderByEpochDesc(String objectName);
 }

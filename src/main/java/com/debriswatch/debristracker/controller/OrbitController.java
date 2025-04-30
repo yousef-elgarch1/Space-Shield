@@ -46,11 +46,35 @@ public class OrbitController {
                                 point.getAltitude()
                         );
                     } else {
-                        return null; // filtered below
+                        return null; 
                     }
                 })
                 .filter(Objects::nonNull)
                 .toList();
+    }
+
+
+    /**
+     * Endpoint: /api/orbit/predict?objectName=EXPLORER%201&days=2
+     */
+    @GetMapping("/predict")
+    public ResponseEntity<List<OrbitPoint>> predictOrbit(
+            @RequestParam String objectName,
+            @RequestParam(defaultValue = "1") int days
+    ) {
+        // Cap the max days for performance
+        if (days < 1 || days > 3) {
+            return ResponseEntity.badRequest().body(Collections.emptyList());
+        }
+
+        // Fetch latest TLE for given object
+        TleData tle = tleRepository.findTopByObjectNameOrderByEpochDesc(objectName);
+        if (tle == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<OrbitPoint> prediction = orbitService.predictOrbitForDays(tle, days);
+        return ResponseEntity.ok(prediction);
     }
 }
 
