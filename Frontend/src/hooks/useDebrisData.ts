@@ -1,165 +1,234 @@
-
-import { useState, useEffect, useCallback } from 'react';
-import { useToast } from '@/components/ui/use-toast';
-import { 
-  fetchRealtimeOrbits, 
-  fetchTleByType, 
-  fetchLatestTlePerObject,
-  OrbitResponse,
-  TleData,
-  calculateOrbitalParameters
-} from '@/services/debrisApi';
-import apiConfig from '@/config/apiConfig';
+// hooks/useDebrisData.ts
+import { useState, useEffect } from 'react';
 
 export interface DebrisObject {
   id: string;
   name: string;
   type: string;
-  altitude: string;
+  status: 'normal' | 'warning' | 'critical';
   latitude: number;
   longitude: number;
-  inclination: string;
-  velocity: string;
-  lastUpdated: string;
-  status: 'normal' | 'warning' | 'critical';
-  info: string;
-  tleData?: TleData; // Include the original TLE data for detailed info
-  orbitParams?: {
-    apogee: string;
-    perigee: string;
-    period: string;
-    inclination: string;
-    eccentricity: string;
-    revNumber: number;
-    rightAscension: string;
-    argumentOfPerigee: string;
-    meanAnomaly: string;
-  };
+  altitude: number | string;
+  velocity?: string;
+  inclination?: string;
+  lastUpdated?: string;
+  info?: string;
+  tleData?: any;
+  orbitParams?: any;
+  dataSource?: string;
 }
 
-export function useDebrisData() {
+export const useDebrisData = () => {
   const [debrisObjects, setDebrisObjects] = useState<DebrisObject[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isFetching, setIsFetching] = useState<boolean>(false); // For background refreshes
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
+  const [dataSource, setDataSource] = useState<string>('mysql');
+  const [lastUpdated, setLastUpdated] = useState<string>(new Date().toISOString());
 
-  // Helper function to determine object status based on parameters
-  const determineStatus = (tleData: TleData): 'normal' | 'warning' | 'critical' => {
-    // This is a simplified logic - in a real system, use more sophisticated assessment
-    const perigee = (42164 / Math.pow(tleData.meanMotion * 0.0743, 2/3)) * (1 - tleData.eccentricity) - 6378.137;
-    
-    // Arbitrary thresholds for demonstration
-    if (perigee < 250) return 'critical'; // Very low altitude
-    if (tleData.eccentricity > 0.1) return 'warning'; // High eccentricity
-    return 'normal';
+  // Function to refresh data
+  const refreshData = async () => {
+    setIsFetching(true);
+    await fetchData();
+    setIsFetching(false);
   };
 
-  // Generate a concise info description based on TLE data
-  const generateInfo = (tleData: TleData): string => {
-    const objectType = tleData.type || 'Unknown';
-    const period = (1440 / tleData.meanMotion).toFixed(1);
-    const inclination = tleData.inclination.toFixed(1);
-    
-    return `${objectType} with NORAD ID ${tleData.noradCatId}. Orbital period of ${period} minutes at ${inclination}° inclination. International designator: ${tleData.intDesignator}.`;
-  };
-
-  // Format the current date/time for lastUpdated field
-  const getCurrentTimeString = (): string => {
-    return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  };
-
-  // Convert TLE and orbit data to our application's debris object format
-  const mapToDebrisObject = (tleData: TleData, orbitData?: OrbitResponse): DebrisObject => {
-    const status = determineStatus(tleData);
-    const info = generateInfo(tleData);
-    const orbitParams = calculateOrbitalParameters(tleData);
-    
-    // Calculate velocity based on orbital parameters (simplified)
-    const semiMajorAxis = 42164 / Math.pow(tleData.meanMotion * 0.0743, 2/3);
-    const velocity = Math.sqrt(398600.4418 / semiMajorAxis).toFixed(2); // km/s
-    
-    return {
-      id: tleData.noradCatId || `obj-${tleData.id}`,
-      name: tleData.objectName || `Unknown Object ${tleData.id}`,
-      type: tleData.type || 'Unknown',
-      altitude: orbitData ? `${orbitData.altitude.toFixed(1)} km` : 'Unknown',
-      latitude: orbitData?.latitude || 0,
-      longitude: orbitData?.longitude || 0,
-      inclination: `${tleData.inclination.toFixed(1)}°`,
-      velocity: `${velocity} km/s`,
-      lastUpdated: getCurrentTimeString(),
-      status,
-      info,
-      tleData: tleData, // Store the original TLE data for reference
-      orbitParams: orbitParams
-    };
-  };
-
-  const fetchData = useCallback(async () => {
+  // Function to force refresh from MySQL
+  const forceRefreshFromMySQL = async () => {
+    setIsLoading(true);
+    setError(null);
     try {
-      setIsLoading(true);
-      setError(null);
-      
-      console.log('Fetching debris data from MySQL database via Spring Boot API...');
-      
-      // Fetch the latest TLE data for each object from MySQL
-      const tleData = await fetchLatestTlePerObject();
-      console.log('Received TLE data:', tleData.length, 'records');
-      
-      // Fetch real-time orbital positions
-      const orbitData = await fetchRealtimeOrbits();
-      console.log('Received orbit data:', orbitData.length, 'records');
-      
-      // Map orbit data by object name for easier lookup
-      const orbitMap = new Map<string, OrbitResponse>();
-      orbitData.forEach(orbit => {
-        orbitMap.set(orbit.objectName, orbit);
-      });
-      
-      // Combine TLE and orbit data
-      const objects = tleData.map(tle => {
-        const orbit = orbitMap.get(tle.objectName);
-        return mapToDebrisObject(tle, orbit);
-      });
-      
-      setDebrisObjects(objects);
-      console.log('Processed debris objects:', objects.length);
-      
-      if (objects.length === 0) {
-        setError('No debris data found in MySQL database');
-        toast({
-          title: "No Data",
-          description: "No debris data found. The database might be empty.",
-          variant: "destructive"
-        });
+      // Call the TLE fetch endpoint to reload data from source
+      const fetchResponse = await fetch('http://localhost:8080/api/tle/fetch');
+      if (!fetchResponse.ok) {
+        throw new Error('Failed to refresh TLE data');
       }
-    } catch (err) {
-      setError('Failed to fetch debris data from MySQL database');
-      console.error('Error fetching debris data:', err);
-      toast({
-        title: "Database Connection Error",
-        description: "Could not connect to MySQL database via the API",
-        variant: "destructive"
-      });
+      
+      // After reloading, get the updated data
+      await fetchData();
+    } catch (err: any) {
+      console.error('Error forcing MySQL refresh:', err);
+      setError(`Failed to force refresh: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  };
 
-  // Initial data fetch
+  // Main data fetching function
+  const fetchData = async () => {
+    try {
+      setError(null);
+      
+      console.log('Fetching real-time orbit data...');
+      const orbitResponse = await fetch('http://localhost:8080/api/orbit/realtime', {
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (!orbitResponse.ok) {
+        throw new Error(`API error: ${orbitResponse.status}`);
+      }
+      
+      const orbitData = await orbitResponse.json();
+      console.log(`Received ${orbitData.length} orbit objects`);
+      
+      // Fetch TLE data for additional details
+      const tleResponse = await fetch('http://localhost:8080/api/tle/latest-per-object');
+      const satelliteResponse = await fetch('http://localhost:8080/api/tle/by-type?type=SATELLITE');
+      const rocketResponse = await fetch('http://localhost:8080/api/tle/by-type?type=ROCKET%20BODY');
+      
+      if (!tleResponse.ok || !satelliteResponse.ok || !rocketResponse.ok) {
+        throw new Error('Failed to fetch TLE data');
+      }
+      
+      const tleData = await tleResponse.json();
+      const satelliteData = await satelliteResponse.json();
+      const rocketData = await rocketResponse.json();
+      
+      // Create a map for fast TLE lookup
+      const tleMap = new Map();
+      tleData.forEach(tle => {
+        tleMap.set(tle.objectName, tle);
+      });
+      
+      // Transform the data for visualization
+      const transformedData = orbitData.map((item: any) => {
+        const objectName = item.objectName;
+        const tleInfo = tleMap.get(objectName);
+        
+        // Determine object type
+        let type = 'UNKNOWN';
+        if (tleInfo?.objectType) {
+          type = tleInfo.objectType;
+        } else if (objectName.includes('R/B')) {
+          type = 'ROCKET BODY';
+        } else if (objectName.includes('DEB')) {
+          type = 'DEBRIS';
+        } else {
+          type = 'SATELLITE';
+        }
+        
+        // Determine status based on altitude and velocity
+        let status: 'normal' | 'warning' | 'critical' = 'normal';
+        const altitude = typeof item.altitude === 'string' ? 
+          parseFloat(item.altitude.replace(/[^0-9.]/g, '')) : 
+          item.altitude;
+          
+        if (altitude < 200000) {
+          status = 'critical';
+        } else if (altitude < 500000) {
+          status = 'warning';
+        }
+        
+        // Create formatted orbit parameters
+        const orbitParams = {
+          inclination: tleInfo?.inclination ? `${tleInfo.inclination.toFixed(2)}°` : 'N/A',
+          eccentricity: tleInfo?.eccentricity?.toFixed(6) || 'N/A',
+          period: tleInfo?.period ? `${tleInfo.period.toFixed(2)} min` : 'N/A',
+          apogee: tleInfo?.apogee ? `${tleInfo.apogee.toFixed(2)} km` : 'N/A',
+          perigee: tleInfo?.perigee ? `${tleInfo.perigee.toFixed(2)} km` : 'N/A'
+        };
+        
+        return {
+          id: objectName,
+          name: objectName,
+          type: type,
+          status: status,
+          latitude: item.latitude,
+          longitude: item.longitude,
+          altitude: typeof item.altitude === 'number' ? 
+            `${(item.altitude / 1000).toFixed(2)} km` : 
+            item.altitude,
+          lastUpdated: new Date().toLocaleString(),
+          info: `Tracked space object at ${Math.round(
+            typeof item.altitude === 'number' ? item.altitude / 1000 : 0
+          )} km altitude`,
+          tleData: {
+            line1: tleInfo?.tleLine1 || 'N/A',
+            line2: tleInfo?.tleLine2 || 'N/A',
+            noradCatId: tleInfo?.noradCatId || 'N/A',
+            intDesignator: tleInfo?.intldes || 'N/A',
+            classification: tleInfo?.classificationType || 'U',
+            revNumber: tleInfo?.revAtEpoch || 'N/A'
+          },
+          orbitParams: orbitParams,
+          velocity: '7.8 km/s', // Approximate orbital velocity
+          dataSource: 'mysql'
+        };
+      });
+      
+      setDebrisObjects(transformedData);
+      setDataSource('mysql');
+      setLastUpdated(new Date().toISOString());
+    } catch (err: any) {
+      console.error('Error fetching debris data:', err);
+      setError(err.message);
+      
+      // If API fails, provide fallback data
+      if (debrisObjects.length === 0) {
+        // Load fallback data
+        setDebrisObjects(getFallbackData());
+        setDataSource('fallback');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Initial data loading
   useEffect(() => {
+    setIsLoading(true);
     fetchData();
     
-    // Set up polling for real-time updates
-    const interval = setInterval(fetchData, apiConfig.requestSettings.pollingInterval);
+    // Set up periodic refresh
+    const intervalId = setInterval(refreshData, 60000); // Refresh every minute
     
-    return () => clearInterval(interval);
-  }, [fetchData]);
+    return () => clearInterval(intervalId);
+  }, []);
 
-  return {
-    debrisObjects,
-    isLoading,
+  return { 
+    debrisObjects, 
+    isLoading, 
+    isFetching,
     error,
-    refreshData: fetchData
+    refreshData,
+    forceRefreshFromMySQL,
+    dataSource,
+    lastUpdated
   };
-}
+};
+
+// Fallback data in case the API fails
+const getFallbackData = (): DebrisObject[] => {
+  // Return some sample data for testing
+  return [
+    {
+      id: "EXPLORER 7",
+      name: "EXPLORER 7",
+      type: "SATELLITE",
+      status: 'normal',
+      latitude: -49.8042911966643,
+      longitude: 131.06343502302,
+      altitude: "2138.45 km",
+      info: "Historic NASA satellite launched in 1959",
+      orbitParams: {
+        inclination: "50.28°",
+        eccentricity: "0.009338",
+        period: "94.84 min",
+        apogee: "575.32 km",
+        perigee: "446.65 km"
+      },
+      tleData: {
+        line1: "1 00022U 59009A   25118.89478947 .00010074 00000-0 44662-3 0  9997",
+        line2: "2 00022 50.2752 331.0479 0093385 267.9308 91.0952 15.18298277737190",
+        noradCatId: "22",
+        intDesignator: "59009A",
+        classification: "U",
+        revNumber: "73719"
+      },
+      dataSource: "fallback"
+    },
+    // Add more fallback items here...
+  ];
+};

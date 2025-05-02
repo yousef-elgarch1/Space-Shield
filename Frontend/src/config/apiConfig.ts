@@ -1,19 +1,26 @@
+// src/config/apiConfig.ts
 
 /**
- * API configuration for the debris tracking backend
+ * API configuration for the space debris tracking backend
  */
 const apiConfig = {
   // Base URL for the API - update this to your actual Spring Boot backend URL
-  baseUrl: 'http://localhost:8080/api',
+  baseUrl: 'http://localhost:8080',
   
   // Endpoints from your Spring Boot controllers
   endpoints: {
-    realTimeOrbits: '/orbit/realtime',
-    tleByType: '/tle/by-type',
-    latestTle: '/tle/latest',
-    latestTlePerObject: '/tle/latest-per-object',
-    welcome: '/tle/welcome',
-    fetch: '/tle/fetch'
+    // Orbit Controller endpoints
+    realTimeOrbits: '/api/orbit/realtime',
+    predictOrbit: '/api/orbit/predict',
+    
+    // Home Controller endpoints
+    tleByType: '/api/tle/by-type',
+    latestTle: '/api/tle/latest',
+    latestTlePerObject: '/api/tle/latest-per-object',
+    welcome: '/api/tle/welcome',
+    
+    // TleFetch Controller endpoints
+    fetch: '/api/tle/fetch'
   },
   
   // Request settings
@@ -22,25 +29,17 @@ const apiConfig = {
     timeout: 10000,
     
     // Time in milliseconds between polling for real-time updates
-    pollingInterval: 5000, // Reduced to 5 seconds for more real-time updates
+    pollingInterval: 5000, // 5 seconds for real-time updates
+  },
+  
+  // CORS configuration
+  // This is for reference only - actual CORS settings must be configured in your Spring Boot backend
+  corsSettings: {
+    allowedOrigins: ['http://localhost:5173', 'http://localhost:8080'],
+    allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['*'],
+    allowCredentials: true
   }
 };
-
-/**
- * NOTE: MySQL Database Connection
- * 
- * Database credentials should NOT be stored in the frontend code.
- * They should be configured in your Spring Boot application's 
- * application.properties or application.yml file on the server side.
- * 
- * Example Spring Boot configuration (application.properties):
- * 
- * spring.datasource.url=jdbc:mysql://localhost:3306/spaceshieldDB
- * spring.datasource.username=your_mysql_username
- * spring.datasource.password=your_mysql_password
- * spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
- * spring.jpa.hibernate.ddl-auto=update
- * spring.jpa.show-sql=true
- */
 
 export default apiConfig;

@@ -9,11 +9,13 @@ import Navigation from '@/components/Navigation';
 import { Satellite, Radar, AlertTriangle, BarChart3, Rocket, Maximize2, Minimize2, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { useToast } from '@/components/ui/use-toast';
+import DebugPanel from '@/components/DebugPanel';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [fullscreenEarth, setFullscreenEarth] = useState(false);
   const [selectedDebris, setSelectedDebris] = useState<{id: string, name: string, info: string} | null>(null);
+  const [showDebug, setShowDebug] = useState(false); // Added showDebug state
   const { toast: uiToast } = useToast();
 
   const handleSelectDebris = (debrisId: string, debris: any) => {
@@ -237,9 +239,11 @@ const Index = () => {
               >
                 Run AI Analysis
               </button>
+
             </div>
           </div>
         )}
+        {showDebug && <DebugPanel />}
       </div>
     </div>
   );

@@ -48,10 +48,32 @@ interface DebrisInfoProps {
     info: string;
     type: string;
     status: 'normal' | 'warning' | 'critical';
-    tleData?: any;
-    orbitParams?: any;
+    tleData?: {
+      line1: string;
+      line2: string;
+    };
+    orbitParams?: {
+      period?: string;
+      inclination?: string;
+      [key: string]: string | undefined;
+    };
   };
-  onSelect: (id: string, debris: any) => void;
+  onSelect: (id: string, debris: {
+    id: string;
+    name: string;
+    info: string;
+    type: string;
+    status: 'normal' | 'warning' | 'critical';
+    tleData?: {
+      line1: string;
+      line2: string;
+    };
+    orbitParams?: {
+      period?: string;
+      inclination?: string;
+      [key: string]: string | undefined;
+    };
+  }) => void;
 }
 
 const DebrisInfo: React.FC<DebrisInfoProps> = ({ position, debris, onSelect }) => {
@@ -111,7 +133,15 @@ const DebrisInfo: React.FC<DebrisInfoProps> = ({ position, debris, onSelect }) =
 };
 
 interface EarthVisualizationProps {
-  onSelectDebris?: (debrisId: string, debris: any) => void;
+  onSelectDebris?: (debrisId: string, debris: { 
+    id: string; 
+    name: string; 
+    info: string; 
+    type: string; 
+    status: 'normal' | 'warning' | 'critical'; 
+    tleData?: any; 
+    orbitParams?: any; 
+  }) => void;
   fullscreen?: boolean;
 }
 
