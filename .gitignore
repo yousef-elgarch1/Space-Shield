@@ -33,3 +33,8 @@ build/
 .vscode/
 # Environment Variables
 .env
+
+
+# Frontend specific
+node_modules/
+/Frontend/node_modules/
