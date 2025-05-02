@@ -35,6 +35,3 @@ build/
 .env
 
 
-# Frontend specific
-node_modules/
-/Frontend/node_modules/
