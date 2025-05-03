@@ -1,5 +1,7 @@
 package com.debriswatch.debristracker.service;
 import io.github.cdimascio.dotenv.Dotenv;
+
+import com.debriswatch.debristracker.Factory.TleObjectFactory;
 import com.debriswatch.debristracker.model.Debris;
 import com.debriswatch.debristracker.model.RocketBody;
 import com.debriswatch.debristracker.model.Satellite;
@@ -13,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.el.ELException;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,14 +55,13 @@ public class TleService {
     fetchAndProcessTleData(); // your existing method
 }
 */
+@Autowired SatelliteRepository satelliteRepository;
+@Autowired RocketBodyRepository rocketBodyRepository;
+@Autowired DebrisRepository debrisRepository;
+@Autowired TleRepository tleRepository;
 @Autowired
-private SatelliteRepository satelliteRepository;
-@Autowired
-private RocketBodyRepository rocketBodyRepository;
-@Autowired
-private DebrisRepository debrisRepository;
-@Autowired
-private TleRepository tleRepository;
+private TleObjectFactory tleObjectFactory;//factory for space object
+
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule()); // For LocalDateTime support
     /* 
     @PostConstruct
@@ -78,12 +80,12 @@ private TleRepository tleRepository;
         String tleUrl = "https://www.space-track.org/basicspacedata/query/class/tle_latest/limit/100/format/json";
     
         try { 
-//                  manage cookies for the authentification error using cookie handler 
-//                  Create the client 
+//manage cookies for the authentification error using cookie handler 
+//Create the client 
      HttpClient client = HttpClient.newBuilder()
     .cookieHandler(new CookieManager())
     .build();
-//                   Authentification request 
+//Authentification request 
             System.out.println("Sending login request...");
             HttpRequest loginRequest = HttpRequest.newBuilder()
                     .uri(URI.create(loginUrl))
@@ -108,28 +110,25 @@ private TleRepository tleRepository;
             List<TleData> tleDataList = parseTleJson(tleJson);
             System.out.println(" Parsed TLE records: " + tleDataList.size());
     
-            System.out.println(" Saving to DB...");
+            System.out.println(" Saving to DB .  .  .\n");
             tleRepository.saveAll(tleDataList);
             System.out.println(" Save complete");
             
-        // to be changed 
-          for (TleData tle : tleDataList) {
-              String type=tle.getObjectType().toUpperCase();
-
-          if(type.equals("DEBRIS")){
-               Debris debris=new Debris(tle);
-                debrisRepository.save(debris);
-          }else if(type.equals("ROCKET BODY")) {
-              RocketBody rocketBody = new RocketBody(tle);
-              rocketBodyRepository.save(rocketBody);
-          }else {
-          Satellite satellite=new Satellite(tle);
-           satelliteRepository.save(satellite);
-            }}
-         } catch (Exception e) {
-            System.err.println(" Error occurred:");
-            e.printStackTrace();
-        }
+            for (TleData tle : tleDataList) {
+                TleData typedObject = tleObjectFactory.create(tle);
+            
+                if (typedObject instanceof Debris debris) {
+                    debrisRepository.save(debris);
+                } else if (typedObject instanceof RocketBody rocketBody) {
+                    rocketBodyRepository.save(rocketBody);
+                } else if (typedObject instanceof Satellite satellite) {
+                    satelliteRepository.save(satellite);
+                }
+            }
+                
+    }catch(Throwable exp){
+        System.err.println("error in tle service class : " + exp ) ;
+    }
     } 
     
     List<TleData> parseTleJson(String tleJson) throws Exception {
