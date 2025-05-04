@@ -18,6 +18,8 @@ import com.debriswatch.debristracker.service.OrbitService;
 import com.debriswatch.debristracker.service.TleService;
 
 @RestController
+@CrossOrigin(origins = "*") // adding the CrossOrigin annotation to allow requests from any origin- ELGARCH
+                            // Youssef
 @RequestMapping("/api/orbit")
 public class OrbitController {
 
