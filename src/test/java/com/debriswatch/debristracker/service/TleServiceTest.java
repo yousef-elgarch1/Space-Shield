@@ -52,7 +52,7 @@ class TleServiceTest {
 
         // Spy the service to override JSON parsing behavior
         TleService spyService = Mockito.spy(tleService);
-        doReturn(tleList).when(spyService).parseTleJson(any());
+      //  doReturn(tleList).when(spyService).parseTleJson(any());
 
         // Mock factory to return typed objects
         when(tleObjectFactory.create(fullSatelliteTle)).thenReturn(new Satellite(fullSatelliteTle));
