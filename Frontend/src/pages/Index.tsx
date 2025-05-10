@@ -140,7 +140,7 @@ const Index = () => {
             <MonitoringPanel />
           </div>
         )}
-        
+
         {activeTab === 'alerts' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
@@ -151,7 +151,23 @@ const Index = () => {
                 <Alerts />
               </div>
             </div>
+<<<<<<< Updated upstream
      
+=======
+            <div className="h-[400px] rounded-lg overflow-hidden relative">
+              <div className={`absolute inset-0 ${fullscreenEarth ? 'opacity-0 pointer-events-none' : 'opacity-100'} transition-opacity duration-300`}>
+                <EarthVisualization onSelectDebris={handleSelectDebris} />
+              </div>
+              {fullscreenEarth && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
+                  <p className="text-white text-center">
+                    <Maximize2 className="mx-auto mb-2" />
+                    Earth view is in fullscreen mod
+                  </p>
+                </div>
+              )}
+            </div>
+>>>>>>> Stashed changes
           </div>
         )}
         

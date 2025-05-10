@@ -1,4 +1,9 @@
+<<<<<<< Updated upstream
 import React, { useMemo, useState, useEffect } from 'react';
+=======
+// components/StatisticsPanel.tsx
+import React, { useMemo } from 'react';
+>>>>>>> Stashed changes
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend } from 'recharts';
 import { Radar, Satellite, Database, Shield, AlertTriangle, BarChart3, Zap, MapPin, Globe } from 'lucide-react';
 // Changed 'Map' to 'MapPin' or 'Globe' to avoid conflict with JavaScript's Map object
