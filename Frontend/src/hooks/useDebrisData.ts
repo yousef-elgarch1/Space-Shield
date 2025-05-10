@@ -1,5 +1,5 @@
-// hooks/useDebrisData.ts
-import { useState, useEffect } from 'react';
+// Updated hooks/useDebrisData.ts
+import { useState, useEffect, useRef } from 'react';
 
 export interface DebrisObject {
   id: string;
@@ -16,15 +16,28 @@ export interface DebrisObject {
   tleData?: any;
   orbitParams?: any;
   dataSource?: string;
+  // Add timestamp for ordering and keeping track of when object was added
+  timestamp?: number;
 }
 
 export const useDebrisData = () => {
   const [debrisObjects, setDebrisObjects] = useState<DebrisObject[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isFetching, setIsFetching] = useState<boolean>(false); // For background refreshes
+  const [isFetching, setIsFetching] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [dataSource, setDataSource] = useState<string>('mysql');
   const [lastUpdated, setLastUpdated] = useState<string>(new Date().toISOString());
+  
+  // Store API responses for debug purposes
+  const [apiResponses, setApiResponses] = useState<any>({
+    orbit: [],
+    satellite: [],
+    rocket: [],
+    debris: []
+  });
+  
+  // Keep an object map for detecting duplicates and updates
+  const objectMapRef = useRef(new Map<string, DebrisObject>());
 
   // Function to refresh data
   const refreshData = async () => {
@@ -77,6 +90,7 @@ export const useDebrisData = () => {
       const tleResponse = await fetch('http://localhost:8080/api/tle/latest-per-object');
       const satelliteResponse = await fetch('http://localhost:8080/api/tle/by-type?type=SATELLITE');
       const rocketResponse = await fetch('http://localhost:8080/api/tle/by-type?type=ROCKET%20BODY');
+      const debrisResponse = await fetch('http://localhost:8080/api/tle/by-type?type=DEBRIS');
       
       if (!tleResponse.ok || !satelliteResponse.ok || !rocketResponse.ok) {
         throw new Error('Failed to fetch TLE data');
@@ -85,6 +99,15 @@ export const useDebrisData = () => {
       const tleData = await tleResponse.json();
       const satelliteData = await satelliteResponse.json();
       const rocketData = await rocketResponse.json();
+      const debrisData = await debrisResponse.json();
+      
+      // Store API responses for debugging
+      setApiResponses({
+        orbit: orbitData,
+        satellite: satelliteData,
+        rocket: rocketData,
+        debris: debrisData
+      });
       
       // Create a map for fast TLE lookup
       const tleMap = new Map();
@@ -150,22 +173,48 @@ export const useDebrisData = () => {
             noradCatId: tleInfo?.noradCatId || 'N/A',
             intDesignator: tleInfo?.intldes || 'N/A',
             classification: tleInfo?.classificationType || 'U',
-            revNumber: tleInfo?.revAtEpoch || 'N/A'
+            revNumber: tleInfo?.revAtEpoch || 'N/A',
+            epochYear: tleInfo?.epochYear || 'N/A',
+            epochDay: tleInfo?.epochDay || 'N/A'
           },
           orbitParams: orbitParams,
           velocity: '7.8 km/s', // Approximate orbital velocity
-          dataSource: 'mysql'
+          dataSource: 'mysql',
+          timestamp: Date.now() // Add timestamp for sorting
         };
       });
       
-      setDebrisObjects(transformedData);
+      // Combine existing and new objects, keeping track of duplicates
+      const objectMap = objectMapRef.current;
+      
+      // Add all new objects to the map
+      transformedData.forEach((newObj) => {
+        // If object already exists, update its position but keep the original timestamp
+        if (objectMap.has(newObj.id)) {
+          const existingObj = objectMap.get(newObj.id);
+          // Preserve the original timestamp so we know when we first saw this object
+          newObj.timestamp = existingObj?.timestamp || newObj.timestamp;
+          
+          // If position/data has changed significantly, update it
+          objectMap.set(newObj.id, newObj);
+        } else {
+          // New object, add it to the map
+          objectMap.set(newObj.id, newObj);
+        }
+      });
+      
+      // Convert map back to array, sorted by timestamp (newest first)
+      const combinedData = Array.from(objectMap.values());
+      
+      // Update state with combined data
+      setDebrisObjects(combinedData);
       setDataSource('mysql');
       setLastUpdated(new Date().toISOString());
     } catch (err: any) {
       console.error('Error fetching debris data:', err);
       setError(err.message);
       
-      // If API fails, provide fallback data
+      // If API fails, provide fallback data only if we have no data
       if (debrisObjects.length === 0) {
         // Load fallback data
         setDebrisObjects(getFallbackData());
@@ -181,8 +230,8 @@ export const useDebrisData = () => {
     setIsLoading(true);
     fetchData();
     
-    // Set up periodic refresh
-    const intervalId = setInterval(refreshData, 60000); // Refresh every minute
+    // Set up periodic refresh (every 20 seconds for testing, adjust as needed)
+    const intervalId = setInterval(refreshData, 20000);
     
     return () => clearInterval(intervalId);
   }, []);
@@ -195,7 +244,8 @@ export const useDebrisData = () => {
     refreshData,
     forceRefreshFromMySQL,
     dataSource,
-    lastUpdated
+    lastUpdated,
+    apiResponses // Include API responses for debugging
   };
 };
 
@@ -227,7 +277,8 @@ const getFallbackData = (): DebrisObject[] => {
         classification: "U",
         revNumber: "73719"
       },
-      dataSource: "fallback"
+      dataSource: "fallback",
+      timestamp: Date.now()
     },
     // Add more fallback items here...
   ];
