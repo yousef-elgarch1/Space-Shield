@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import EarthVisualization from '@/components/EarthVisualization';
 import AlertPanel from '@/components/AlertPanel';
 import AlertsPanel from '@/components/AlertsPanel';
+import Alerts from '@/components/AdvancedAlertDebrisSystem';
 import StatisticsPanel from '@/components/StatisticsPanel';
 import MonitoringPanel from '@/components/MonitoringPanel';
 import SettingsPanel from '@/components/SettingsPanel';
@@ -65,12 +66,12 @@ const Index = () => {
       </div>
       
       {/* Navigation sidebar - keep above the fullscreen earth but below the toggle button */}
-      <div className={`${fullscreenEarth ? 'z-40' : ''}`}>
+      <div className={`${fullscreenEarth ? 'z-100' : ''}`}>
         <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
       
       {/* Floating fullscreen toggle button - always visible */}
-      <div className={`fixed top-4 right-4 z-50`}>
+      <div className={`fixed top-10 right-4 z-50`}>
         <button 
           onClick={toggleFullscreenEarth}
           className="p-2 bg-space-dark-blue bg-opacity-70 hover:bg-opacity-100 text-space-satellite-blue rounded-md transition-all duration-200 shadow-lg"
@@ -144,25 +145,13 @@ const Index = () => {
           <div className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
               <div className="lg:col-span-2">
-                <AlertsPanel />
+                <Alerts />
               </div>
               <div>
-                <AlertPanel />
+                <Alerts />
               </div>
             </div>
-            <div className="h-[400px] rounded-lg overflow-hidden relative">
-              <div className={`absolute inset-0 ${fullscreenEarth ? 'opacity-0 pointer-events-none' : 'opacity-100'} transition-opacity duration-300`}>
-                <EarthVisualization onSelectDebris={handleSelectDebris} />
-              </div>
-              {fullscreenEarth && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
-                  <p className="text-white text-center">
-                    <Maximize2 className="mx-auto mb-2" />
-                    Earth view is in fullscreen mode
-                  </p>
-                </div>
-              )}
-            </div>
+     
           </div>
         )}
         
@@ -172,25 +161,13 @@ const Index = () => {
               <div className="lg:col-span-3">
                 <StatisticsPanel />
               </div>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 rounded-lg overflow-hidden h-[500px] relative">
-                <div className={`absolute inset-0 ${fullscreenEarth ? 'opacity-0 pointer-events-none' : 'opacity-100'} transition-opacity duration-300`}>
-                  <EarthVisualization onSelectDebris={handleSelectDebris} />
-                </div>
-                {fullscreenEarth && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
-                    <p className="text-white text-center">
-                      <Maximize2 className="mx-auto mb-2" />
-                      Earth view is in fullscreen mode
-                    </p>
-                  </div>
-                )}
-              </div>
+          
+
               <div>
                 <AlertPanel />
-              </div>
+               </div>
             </div>
+     
           </div>
         )}
         
