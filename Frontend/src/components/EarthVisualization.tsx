@@ -1,5 +1,5 @@
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Stars, useTexture, Text, Html } from '@react-three/drei';
 import * as THREE from 'three';
@@ -8,10 +8,18 @@ import { useDebrisData } from '@/hooks/useDebrisData';
 import { InfoPanel } from './InfoPanel';
 import { Satellite, Database } from 'lucide-react';
 
+// Add these imports at the top of your EarthVisualization.tsx file
+import DebrisDetailCard from './DebrisDetailCard';
+import ColorLegend from './ColorLegend';  // If created as a separate component
+import { Eye, EyeOff, HelpCircle, Filter } from 'lucide-react';
+
+
+
 // Renamed from Earth to EarthGlobe to avoid conflict with Lucide icon
 const EarthGlobe = () => {
   const earthRef = useRef<THREE.Mesh>(null);
   
+
   // Load textures with more reliable fallbacks
   const textures = useTexture({
     map: 'https://images.unsplash.com/photo-1482938289607-e9573fc25ebb',
@@ -39,6 +47,15 @@ const EarthGlobe = () => {
     </mesh>
   );
 };
+
+
+
+
+
+
+
+
+
 
 interface DebrisInfoProps {
   position: [number, number, number];
@@ -75,6 +92,15 @@ interface DebrisInfoProps {
     };
   }) => void;
 }
+
+
+
+
+
+
+
+
+
 
 const DebrisInfo: React.FC<DebrisInfoProps> = ({ position, debris, onSelect }) => {
   const [hovered, setHovered] = useState(false);
@@ -132,6 +158,10 @@ const DebrisInfo: React.FC<DebrisInfoProps> = ({ position, debris, onSelect }) =
   );
 };
 
+
+
+
+
 interface EarthVisualizationProps {
   onSelectDebris?: (debrisId: string, debris: { 
     id: string; 
@@ -149,13 +179,36 @@ const EarthVisualization: React.FC<EarthVisualizationProps> = ({
   onSelectDebris,
   fullscreen = false
 }) => {
-  const { debrisObjects, isLoading } = useDebrisData();
-  const [selectedDebrisId, setSelectedDebrisId] = useState<string | null>(null);
+  const { debrisObjects, isLoading } = useDebrisData(); 
+      // Helper function to get color based on debris type
+  const getDebrisTypeColor = (type) => {
+  const normalizedType = type?.toUpperCase() || 'UNKNOWN';
   
-  // Convert debris data to visualization format
-  const visualizationDebris = debrisObjects.map(debris => {
+  if (normalizedType.includes('SATELLITE') || normalizedType.includes('PAYLOAD')) {
+    return '#4ade80'; // Green
+  } else if (normalizedType.includes('ROCKET') || normalizedType.includes('R/B')) {
+    return '#facc15'; // Yellow
+  } else if (normalizedType.includes('DEBRIS') || normalizedType.includes('DEB')) {
+    return '#ef4444'; // Red
+  } else {
+    return '#3b82f6'; // Blue for unknown
+  }
+  };
+// Add this after your existing state variables
+const [speedValue, setSpeedValue] = useState(25);
+const objectMapRef = useRef(new Map());
+
+const [selectedDebrisId, setSelectedDebrisId] = useState<string | null>(null);
+const [selectedDebris, setSelectedDebris] = useState(null);
+const [showLegend, setShowLegend] = useState(true);
+
+
+
+// Add this useMemo to track and persist objects
+const visualizationDebris = useMemo(() => {
+  // Create or update objects in our map
+  debrisObjects.forEach(debris => {
     // Convert latitude and longitude to 3D coordinates
-    // This uses a simplified conversion for demo purposes
     const radius = 3 + Math.random() * 2; // Vary the orbital radius
     const phi = (90 - debris.latitude) * (Math.PI / 180);
     const theta = (debris.longitude + 180) * (Math.PI / 180);
@@ -164,23 +217,39 @@ const EarthVisualization: React.FC<EarthVisualizationProps> = ({
     const z = radius * Math.sin(phi) * Math.sin(theta);
     const y = radius * Math.cos(phi);
     
-    return {
-      id: debris.id,
-      position: [x, y, z] as [number, number, number],
-      debris: {
+    // If object already exists, update position but keep the object reference
+    if (objectMapRef.current.has(debris.id)) {
+      const existingObj = objectMapRef.current.get(debris.id);
+      existingObj.position = [x, y, z];
+      existingObj.debris = {
+        ...debris,
+        color: getDebrisTypeColor(debris.type)
+      };
+    } else {
+      // New object, add it to the map
+      objectMapRef.current.set(debris.id, {
         id: debris.id,
-        name: debris.name,
-        info: debris.info,
-        type: debris.type,
-        status: debris.status,
-        tleData: debris.tleData,
-        orbitParams: debris.orbitParams
-      }
-    };
+        position: [x, y, z],
+        debris: {
+          ...debris,
+          color: getDebrisTypeColor(debris.type)
+        }
+      });
+    }
   });
+  
+
+
+
+
+  // Return all objects from the map
+  return Array.from(objectMapRef.current.values());
+}, [debrisObjects]);
 
   const handleDebrisClick = (debrisId: string, debris: any) => {
     setSelectedDebrisId(debrisId);
+    setSelectedDebris(debris); // Add this line
+
     if (onSelectDebris) {
       onSelectDebris(debrisId, debris);
     }
@@ -223,7 +292,7 @@ const EarthVisualization: React.FC<EarthVisualizationProps> = ({
               color="#33c3f0" 
               particles={Math.min(15, satelliteDebris.length || 15)} 
               orbitAngle={0.1} 
-              speed={0.8}
+              speed={speedValue / 25}
               isSatellite={true}
             />
             <DebrisOrbit 
@@ -231,21 +300,21 @@ const EarthVisualization: React.FC<EarthVisualizationProps> = ({
               color="#ea384c" 
               particles={Math.min(30, rocketDebris.length || 30)} 
               orbitAngle={0.5} 
-              speed={0.5}
+              speed={speedValue / 25}
             />
             <DebrisOrbit 
               radius={4.8} 
               color="#f97316" 
               particles={Math.min(25, generalDebris.length || 25)} 
               orbitAngle={-0.3} 
-              speed={0.3}
+              speed={speedValue / 25}
             />
             <DebrisOrbit 
               radius={5.5} 
               color="#8B5CF6" 
               particles={20} 
               orbitAngle={0.7} 
-              speed={0.4}
+              speed={speedValue / 25}
               isSatellite={true}
             />
           </>
@@ -272,6 +341,56 @@ const EarthVisualization: React.FC<EarthVisualizationProps> = ({
         />
       </Canvas>
 
+
+      <div className="absolute right-4 top-28 bg-black bg-opacity-80 rounded p-2 text-white">
+  <div className="text-xs mb-1">Orbit Speed</div>
+  <input
+    type="range"
+    min="1"
+    max="50"
+    value={speedValue}
+    onChange={(e) => setSpeedValue(parseInt(e.target.value))}
+    className="w-24"
+  />
+</div>
+
+
+
+<div className="absolute top-4 right-4 space-x-2 flex">
+  <button 
+    onClick={() => setShowLegend(!showLegend)}
+    className="bg-black bg-opacity-70 p-2 rounded text-white hover:bg-opacity-90"
+    title={showLegend ? "Hide Legend" : "Show Legend"}
+  >
+    {showLegend ? <EyeOff size={18} /> : <Eye size={18} />}
+  </button>
+
+  <button 
+    className="bg-black bg-opacity-70 p-2 rounded text-white hover:bg-opacity-90"
+    title="Filter Objects"
+  >
+    <Filter size={18} />
+  </button>
+  
+  <button 
+    className="bg-black bg-opacity-70 p-2 rounded text-white hover:bg-opacity-90"
+    title="Help"
+  >
+    <HelpCircle size={18} />
+  </button>
+</div>
+
+{/* Color Legend */}
+<ColorLegend visible={showLegend} />
+
+{/* Selected Debris Detail Card */}
+{selectedDebris && (
+  <DebrisDetailCard 
+    debris={selectedDebris}
+    onClose={() => setSelectedDebris(null)}
+  />
+)}
+
       {/* Connection status indicator */}
       {fullscreen && (
         <div className="absolute bottom-4 left-4 flex items-center bg-black bg-opacity-60 rounded-full px-3 py-1 text-white text-xs">
@@ -279,6 +398,9 @@ const EarthVisualization: React.FC<EarthVisualizationProps> = ({
           {isLoading ? 'Connecting to MySQL database...' : 'Connected to MySQL database'}
         </div>
       )}
+
+
+      
     </div>
   );
 };
