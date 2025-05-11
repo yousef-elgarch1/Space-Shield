@@ -26,23 +26,22 @@ import io.github.cdimascio.dotenv.Dotenv;
 public class SpaceTrackTleFetcher extends TleFetcher {
 
     private final HttpClient client = HttpClient.newBuilder().cookieHandler(new CookieManager()).build();
-
     private String username;
     private String password;
-
-    @Autowired private SatelliteRepository satelliteRepo;
-    @Autowired private DebrisRepository debrisRepo;
-    @Autowired private RocketBodyRepository rocketRepo;
-    @Autowired private TleRepository tleRepo;
-    @Autowired private TleObjectFactory tleObjectFactory;
+public SpaceTrackTleFetcher(Dotenv dotenv) {
+    this.username = dotenv.get("SPACE_TRACK_USERNAME");
+    this.password = dotenv.get("SPACE_TRACK_PASSWORD");
+}
+    @Autowired SatelliteRepository satelliteRepo;
+    @Autowired DebrisRepository debrisRepo;
+    @Autowired RocketBodyRepository rocketRepo;
+    @Autowired TleRepository tleRepo;
+    @Autowired TleObjectFactory tleObjectFactory;
 
 // authentification method
 
     @Override
     protected void authenticate() throws Exception {
-        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
-        username = dotenv.get("SPACE_TRACK_USERNAME");
-        password = dotenv.get("SPACE_TRACK_PASSWORD");
 
         HttpRequest loginRequest = HttpRequest.newBuilder()
                 .uri(URI.create("https://www.space-track.org/ajaxauth/login"))

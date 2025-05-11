@@ -19,7 +19,7 @@ import com.debriswatch.debristracker.repository.RocketBodyRepository;
 import com.debriswatch.debristracker.repository.SatelliteRepository;
 import com.debriswatch.debristracker.repository.TleRepository;
 @RestController
-@CrossOrigin(origins = "*") // adding the CrossOrigin annotation to allow requests from any origin- ELGARCH
+//@CrossOrigin(origins = "*") // adding the CrossOrigin annotation to allow requests from any origin- ELGARCH
                             // Youssef
 @RequestMapping("/api/tle")
 public class HomeController {

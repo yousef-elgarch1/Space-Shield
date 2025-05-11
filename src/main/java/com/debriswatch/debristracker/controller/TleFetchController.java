@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.debriswatch.debristracker.service.TleService;
 
 @RestController
-@CrossOrigin(origins = "*")//adding the CrossOrigin annotation to allow requests from any origin- ELGARCH Youssef
+//@CrossOrigin(origins = "*")//adding the CrossOrigin annotation to allow requests from any origin- ELGARCH Youssef
 @RequestMapping("/api/tle")
 public class TleFetchController {
 
