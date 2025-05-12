@@ -24,11 +24,12 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 @Component
 public class SpaceTrackTleFetcher extends TleFetcher {
-
+    private final Dotenv dotenv;
     private final HttpClient client = HttpClient.newBuilder().cookieHandler(new CookieManager()).build();
     private String username;
     private String password;
 public SpaceTrackTleFetcher(Dotenv dotenv) {
+      this.dotenv = dotenv;
     this.username = dotenv.get("SPACE_TRACK_USERNAME");
     this.password = dotenv.get("SPACE_TRACK_PASSWORD");
 }
