@@ -1,0 +1,55 @@
+{
+    "common": {
+      "settings": "Paramètres",
+      "language": "Langue",
+      "theme": "Thème",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "close": "Fermer"
+    },
+    "navigation": {
+      "home": "Accueil",
+      "dashboard": "Tableau de bord",
+      "monitoring": "Surveillance",
+      "settings": "Paramètres",
+      "alerts": "Alertes",
+      "debug": "Débogage"
+    },
+    "alerts": {
+      "title": "Alertes",
+      "noAlerts": "Aucune alerte pour le moment",
+      "viewAll": "Voir toutes les alertes",
+      "level": "Niveau d'alerte",
+      "source": "Source",
+      "time": "Heure",
+      "critical": "Critique",
+      "warning": "Avertissement",
+      "info": "Information"
+    },
+    "debris": {
+      "title": "Débris spatiaux",
+      "detail": "Détail des débris",
+      "orbit": "Orbite",
+      "size": "Taille",
+      "velocity": "Vitesse",
+      "distance": "Distance",
+      "riskLevel": "Niveau de risque",
+      "trackingStatus": "Statut de suivi"
+    },
+    "monitoring": {
+      "title": "Surveillance du système",
+      "status": "État du système",
+      "uptime": "Temps de fonctionnement",
+      "connections": "Connexions",
+      "performance": "Performance",
+      "metrics": "Métriques"
+    },
+    "visualization": {
+      "earthView": "Vue de la Terre",
+      "orbitView": "Vue de l'orbite",
+      "zoomIn": "Zoomer",
+      "zoomOut": "Dézoomer",
+      "reset": "Réinitialiser la vue",
+      "legend": "Légende"
+    }
+  }
