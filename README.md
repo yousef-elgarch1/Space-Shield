@@ -188,12 +188,12 @@ The resulting JAR file can be deployed to any Java-capable server.
 
 ## Screenshots
 <div align="center">
-  <img src="assets/page1.png" alt="Dashboard" width="800"/>
+  <img src="main.png" alt="Dashboard" width="800"/>
   <p><em>Main dashboard showing Earth visualization and orbital objects</em></p>
 </div>
 
 <div align="center">
-  <img src="assets/alert.png" alt="Monitoring Panel" width="800"/>
+  <img src="alertss.png" alt="Monitoring Panel" width="800"/>
   <p><em>Monitoring panel with detailed object information</em></p>
 </div>
 
@@ -201,6 +201,12 @@ The resulting JAR file can be deployed to any Java-capable server.
   <img src="assets/stats.png" alt="Statistics" width="800"/>
   <p><em>Statistical analysis of orbital objects</em></p>
 </div>
+
+<div align="center">
+  <img src="earth.png" alt="Statistics" width="800"/>
+  <p><em>Monitoring orbital objects</em></p>
+</div>
+
 
 
 ## Future Plans
@@ -211,10 +217,10 @@ The resulting JAR file can be deployed to any Java-capable server.
 * Space weather impact analysis
 
 ## Contributors
-* **ELGARCH Youssef** - Visualization & Frontend Dev
-* **IBNOU-KADY Nisrine** - Data Processign & Alert System 
-* **BAZZAOUI Youness** - System Architecture & Database Design
-* **TOUZANI Youssef** - Backend Development & Orbital Mechanics
+* **ELGARCH Youssef** 
+* **IBNOU-KADY Nisrine** 
+* **BAZZAOUI Youness** 
+* **TOUZANI Youssef** 
 
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
