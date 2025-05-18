@@ -1,0 +1,55 @@
+{
+    "common": {
+      "settings": "Settings",
+      "language": "Language",
+      "theme": "Theme",
+      "save": "Save",
+      "cancel": "Cancel",
+      "close": "Close"
+    },
+    "navigation": {
+      "home": "Home",
+      "dashboard": "Dashboard",
+      "monitoring": "Monitoring",
+      "settings": "Settings",
+      "alerts": "Alerts",
+      "debug": "Debug"
+    },
+    "alerts": {
+      "title": "Alerts",
+      "noAlerts": "No alerts at this time",
+      "viewAll": "View all alerts",
+      "level": "Alert Level",
+      "source": "Source",
+      "time": "Time",
+      "critical": "Critical",
+      "warning": "Warning",
+      "info": "Information"
+    },
+    "debris": {
+      "title": "Space Debris",
+      "detail": "Debris Detail",
+      "orbit": "Orbit",
+      "size": "Size",
+      "velocity": "Velocity",
+      "distance": "Distance",
+      "riskLevel": "Risk Level",
+      "trackingStatus": "Tracking Status"
+    },
+    "monitoring": {
+      "title": "System Monitoring",
+      "status": "System Status",
+      "uptime": "Uptime",
+      "connections": "Connections",
+      "performance": "Performance",
+      "metrics": "Metrics"
+    },
+    "visualization": {
+      "earthView": "Earth View",
+      "orbitView": "Orbit View",
+      "zoomIn": "Zoom In",
+      "zoomOut": "Zoom Out",
+      "reset": "Reset View",
+      "legend": "Legend"
+    }
+  }

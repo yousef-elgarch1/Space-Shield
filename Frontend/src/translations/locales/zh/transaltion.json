@@ -1,0 +1,55 @@
+{
+    "common": {
+      "settings": "设置",
+      "language": "语言",
+      "theme": "主题",
+      "save": "保存",
+      "cancel": "取消",
+      "close": "关闭"
+    },
+    "navigation": {
+      "home": "主页",
+      "dashboard": "仪表板",
+      "monitoring": "监控",
+      "settings": "设置",
+      "alerts": "警报",
+      "debug": "调试"
+    },
+    "alerts": {
+      "title": "警报",
+      "noAlerts": "当前没有警报",
+      "viewAll": "查看所有警报",
+      "level": "警报级别",
+      "source": "来源",
+      "time": "时间",
+      "critical": "严重",
+      "warning": "警告",
+      "info": "信息"
+    },
+    "debris": {
+      "title": "太空碎片",
+      "detail": "碎片详情",
+      "orbit": "轨道",
+      "size": "大小",
+      "velocity": "速度",
+      "distance": "距离",
+      "riskLevel": "风险等级",
+      "trackingStatus": "跟踪状态"
+    },
+    "monitoring": {
+      "title": "系统监控",
+      "status": "系统状态",
+      "uptime": "运行时间",
+      "connections": "连接",
+      "performance": "性能",
+      "metrics": "指标"
+    },
+    "visualization": {
+      "earthView": "地球视图",
+      "orbitView": "轨道视图",
+      "zoomIn": "放大",
+      "zoomOut": "缩小",
+      "reset": "重置视图",
+      "legend": "图例"
+    }
+  }

@@ -7,6 +7,7 @@ import com.debriswatch.debristracker.model.OrbitPoint;
 import com.debriswatch.debristracker.service.OrbitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,9 +20,10 @@ import com.debriswatch.debristracker.repository.RocketBodyRepository;
 import com.debriswatch.debristracker.repository.SatelliteRepository;
 import com.debriswatch.debristracker.repository.TleRepository;
 @RestController
-//@CrossOrigin(origins = "*") // adding the CrossOrigin annotation to allow requests from any origin- ELGARCH
+// adding the CrossOrigin annotation to allow requests from any origin- ELGARCH
                             // Youssef
 @RequestMapping("/api/tle")
+@CrossOrigin(origins = "*")
 public class HomeController {
     @Autowired 
     private RocketBodyRepository rocketBodyRepository;
