@@ -15,7 +15,7 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 
 class SpaceTrackTleFetcherTest {
-
+ 
     @Mock private SatelliteRepository satelliteRepo;
     @Mock private DebrisRepository debrisRepo;
     @Mock private RocketBodyRepository rocketRepo;
