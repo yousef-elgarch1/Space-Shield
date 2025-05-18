@@ -208,7 +208,31 @@ The resulting JAR file can be deployed to any Java-capable server.
 </div>
 
 
+## Demo Video
+<div align="center">
+  <a href="https://drive.google.com/file/d/1Dx46r5Wz6R4oYaBHnCjVrOxUczepHlSX/view?usp=sharing" target="_blank">
+    <img src="main.png" alt="SpaceShield Demo Video" width="800"/>
+  </a>
+  <p><em>Watch SpaceShield in action (click to play)</em></p>
+</div>
 
+
+
+* **Multilingual Support**
+  <div align="center">
+    <p>
+      <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/gb.svg" alt="English" width="40" style="margin: 0 10px"/>
+      <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/fr.svg" alt="French" width="40" style="margin: 0 10px"/>
+      <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/cn.svg" alt="Chinese" width="40" style="margin: 0 10px"/>
+      <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/jp.svg" alt="Japanese" width="40" style="margin: 0 10px"/>
+    </p>
+  </div>
+  
+  * Full internationalization with support for multiple languages
+  * User interface available in English, French, Chinese, and Japanese
+  * Real-time language switching without page reload
+  * Date, time, and number formatting based on locale
+  * Expandable framework for adding additional languages
 ## Future Plans
 * Mobile application for on-the-go monitoring
 * Integration with additional space object catalogs
