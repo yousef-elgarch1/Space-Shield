@@ -1,0 +1,58 @@
+{
+  "common": {
+    "settings": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "lastUpdated": "Last updated"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "monitoring": "Monitoring",
+    "settings": "Settings",
+    "alerts": "Alerts",
+    "statistics": "Statistics",
+    "debug": "Debug"
+  },
+  "alerts": {
+    "title": "Alerts",
+    "noAlerts": "No alerts at this time",
+    "viewAll": "View all alerts",
+    "level": "Alert Level",
+    "source": "Source",
+    "time": "Time",
+    "critical": "Critical",
+    "warning": "Warning",
+    "info": "Information"
+  },
+  "debris": {
+    "title": "Space Debris",
+    "detail": "Debris Detail",
+    "orbit": "Orbits",
+    "size": "Size",
+    "velocity": "Velocity",
+    "distance": "Distance",
+    "riskLevel": "Risk Level",
+    "trackingStatus": "Tracking Status"
+  },
+  "monitoring": {
+    "title": "Real-time space debris monitoring and collision prediction system",
+    "status": "System operational",
+    "uptime": "Uptime",
+    "connections": "Connections",
+    "performance": "Performance",
+    "metrics": "Metrics"
+  },
+  "visualization": {
+    "earthView": "Earth Orbital View",
+    "orbitView": "Orbit View",
+    "zoomIn": "Enter Fullscreen",
+    "zoomOut": "Exit Fullscreen",
+    "reset": "Reset View",
+    "legend": "Legend",
+    "viewingFullEarth": "Viewing full 3D Earth visualization in background. Use the fullscreen toggle to focus on the Earth view."
+  }
+}

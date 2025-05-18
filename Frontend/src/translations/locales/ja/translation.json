@@ -1,0 +1,55 @@
+{
+    "common": {
+      "settings": "設定",
+      "language": "言語",
+      "theme": "テーマ",
+      "save": "保存",
+      "cancel": "キャンセル",
+      "close": "閉じる"
+    },
+    "navigation": {
+      "home": "ホーム",
+      "dashboard": "ダッシュボード",
+      "monitoring": "モニタリング",
+      "settings": "設定",
+      "alerts": "アラート",
+      "debug": "デバッグ"
+    },
+    "alerts": {
+      "title": "アラート",
+      "noAlerts": "現在アラートはありません",
+      "viewAll": "すべてのアラートを表示",
+      "level": "アラートレベル",
+      "source": "ソース",
+      "time": "時間",
+      "critical": "重大",
+      "warning": "警告",
+      "info": "情報"
+    },
+    "debris": {
+      "title": "宇宙デブリ",
+      "detail": "デブリ詳細",
+      "orbit": "軌道",
+      "size": "サイズ",
+      "velocity": "速度",
+      "distance": "距離",
+      "riskLevel": "リスクレベル",
+      "trackingStatus": "追跡状況"
+    },
+    "monitoring": {
+      "title": "システム監視",
+      "status": "システム状態",
+      "uptime": "稼働時間",
+      "connections": "接続",
+      "performance": "パフォーマンス",
+      "metrics": "メトリクス"
+    },
+    "visualization": {
+      "earthView": "地球ビュー",
+      "orbitView": "軌道ビュー",
+      "zoomIn": "ズームイン",
+      "zoomOut": "ズームアウト",
+      "reset": "ビューをリセット",
+      "legend": "凡例"
+    }
+  }
