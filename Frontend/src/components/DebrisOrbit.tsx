@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { Html } from '@react-three/drei';
+import { Html, Line } from '@react-three/drei';
 
 export type ObjectType = 'SATELLITE' | 'ROCKET BODY' | 'DEBRIS' | 'UNKNOWN';
 
@@ -25,8 +25,8 @@ export const DebrisOrbit: React.FC<DebrisOrbitProps> = ({
   color, 
   objectType = 'UNKNOWN',
   particles = 20, 
-  orbitAngle,
-  speed,
+  orbitAngle = 0,
+  speed = 0.1,
   predictedOrbitPoints,
   isSatellite = false
 }) => {
@@ -279,15 +279,14 @@ export const DebrisOrbit: React.FC<DebrisOrbitProps> = ({
   return (
     <group>
       {/* Main orbit path */}
-      <line ref={orbitRef}>
-        <bufferGeometry attach="geometry" {...orbitGeometry} />
-        <lineBasicMaterial 
-          attach="material" 
-          color={color} 
-          transparent={true} 
-          opacity={0.5} 
-        />
-      </line>
+      <Line
+        ref={orbitRef}
+        points={orbitPoints}
+        color={color}
+        lineWidth={1}
+        transparent
+        opacity={0.5}
+      />
       
       {/* Additional orbit bands for more realistic appearance */}
       {orbitBands.map((band, index) => (
