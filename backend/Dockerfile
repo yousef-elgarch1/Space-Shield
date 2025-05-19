@@ -1,27 +1,23 @@
-# Production image - no build step
-FROM nginx:alpine
+FROM eclipse-temurin:21-jdk-alpine
 
-# Copy your locally built files
-COPY dist/ /usr/share/nginx/html/
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+WORKDIR /app
 
-# Add compression for static assets
-RUN apk add --no-cache brotli && \
-    find /usr/share/nginx/html -type f -regex ".*\.\(js\|css\|svg\|json\)" -exec gzip -9 -k {} \; && \
-    find /usr/share/nginx/html -type f -regex ".*\.\(js\|css\|svg\|json\)" -exec brotli -9 -k {} \; || true
+# Install netcat to allow port checking
+RUN apk add --no-cache netcat-openbsd
 
-# Set proper permissions
-RUN chown -R nginx:nginx /usr/share/nginx/html && \
-    chmod -R 755 /usr/share/nginx/html
+# Copy Spring Boot jar and wait script
+COPY target/*.jar app.jar
+COPY wait-for.sh .
 
-# Use non-root user for better security
-USER nginx
+# Make the wait script executable
+RUN chmod +x wait-for.sh
 
-# Expose port
-EXPOSE 80
+# Expose application port
+EXPOSE 8081
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s CMD wget -q --spider http://localhost/ || exit 1
+# Optional default values for DB host/port (can be overridden in compose/env)
+ENV DB_HOST=mysql-container
+ENV DB_PORT=3306
 
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Use wait-for script as entrypoint
+ENTRYPOINT ["sh", "./wait-for.sh"]
