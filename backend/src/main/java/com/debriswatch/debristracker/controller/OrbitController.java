@@ -36,7 +36,7 @@ public class OrbitController {
 
     @GetMapping("/realtime")
     public List<OrbitResponseDto> getRealTimeOrbits() {
-        tleservice.clearAllTleRelatedData(); // drop all existing data from the databse for optimisation
+        // tleservice.clearAllTleRelatedData(); // drop all existing data from the databse for optimisation
         tleservice.fetchAndProcessTleData();   // fetch data and process it 
         List<TleData> tleList = tleRepository.findLatestTlePerObjectName();   // find latest tle data per object 
         return tleList.stream()

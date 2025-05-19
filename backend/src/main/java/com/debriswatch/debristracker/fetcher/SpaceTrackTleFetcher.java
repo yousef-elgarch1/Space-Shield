@@ -54,16 +54,22 @@ public SpaceTrackTleFetcher(Dotenv dotenv) {
     }
 
 // fetch raw data 
+@Override
+protected String fetchRawData() throws Exception {
+    String queryUrl = "https://www.space-track.org/basicspacedata/query/class/gp/" +
+            "decay_date/null-val/" +
+            "epoch/%3Enow-30/" +
+            "orderby/norad_cat_id%20asc/" +
+            "limit/400/" +
+            "format/json";
 
-    @Override
-    protected String fetchRawData() throws Exception {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://www.space-track.org/basicspacedata/query/class/tle_latest/limit/100/format/json"))
-                .build();
+    HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(queryUrl))
+            .build();
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        return response.body();
-    }
+    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+    return response.body();
+}
 
 // save the tle data in the database 
 
