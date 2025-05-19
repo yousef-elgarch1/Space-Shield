@@ -324,7 +324,7 @@ npm run dev
         <img src="https://i.imgur.com/ikAiW2k.png" width="100" style="border-radius:50%"/><br>
         <b>IBNOU-KADY Nisrine</b><br>
         <small>2A Junior Software Engineer at ENSIAS</small><br>
-        <a href="[https://github.com/nisrineIK](https://github.com/nisrine2002)">
+        <a href="https://github.com/nisrine2002">
           <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" width="80"/>
         </a>
       </td>
@@ -332,7 +332,7 @@ npm run dev
         <img src="https://i.imgur.com/MKb0HWI.png" width="100" style="border-radius:50%"/><br>
         <b>BAZZAOUI Youness</b><br>
         <small>2A Junior Software Engineer at ENSIAS</small><br>
-        <a href="https://github.com/younessBaz">
+        <a href="https://github.com/Younrun">
           <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" width="80"/>
         </a>
       </td>
