@@ -1,7 +1,4 @@
 # Maven / Gradle build directories
-target/
-build/
-
 # IDE files
 .idea/
 *.iml
