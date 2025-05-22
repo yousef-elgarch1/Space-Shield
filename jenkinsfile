@@ -59,7 +59,8 @@ pipeline {
                   )
                 ]) {
                   sh 'docker compose down -v || true'
-                  sh 'docker compose up --build -d'
+                  sh 'docker compose build --no-cache'
+                  sh 'docker compose up -d'
                 }
             }
         }
