@@ -27,6 +27,7 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 dir("${FRONTEND_DIR}") {
+                    sh 'ls -la && cat package-lock.json || echo "LOCKFILE MISSING"'
                     sh 'npm ci'
                     sh 'npm run build'
                 }
