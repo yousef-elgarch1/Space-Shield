@@ -43,7 +43,7 @@ pipeline {
 
         stage('Build & Run Docker Compose') {
             steps {
-                sh 'docker compose down --volumes || true'
+                sh 'docker compose down -v || true'
                 sh 'docker compose up --build -d'
             }
         }

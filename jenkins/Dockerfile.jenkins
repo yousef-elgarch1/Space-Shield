@@ -1,0 +1,21 @@
+FROM jenkins/jenkins:lts
+
+USER root
+
+# Install Docker, curl, and OpenJDK 17 (instead of 21)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    docker.io \
+    curl \
+    ca-certificates \
+    gnupg \
+    openjdk-17-jdk && \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Add Jenkins user to Docker group
+RUN usermod -aG docker jenkins
+
+USER jenkins
