@@ -27,7 +27,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - /c/Users/USER/Desktop/orekit-data-main:/app/orekit-data
+      - ./orekit-data-main:/app/orekit-data
     networks:
       - app-network
     restart: unless-stopped

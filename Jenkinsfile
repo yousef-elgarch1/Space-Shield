@@ -61,7 +61,7 @@ pipeline {
     post {
         always {
             echo '🧹 Cleaning up containers...'
-            sh 'docker compose down --volumes || true'
+            sh 'docker compose down --v || true'
         }
     }
 }
