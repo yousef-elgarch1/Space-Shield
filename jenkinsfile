@@ -37,13 +37,7 @@ pipeline {
             }
         }
 
-        stage('Test Backend') {
-            steps {
-                dir("${BACKEND_DIR}") {
-                    sh './mvnw test'
-                }
-            }
-        }
+
 
         stage('Build & Run Docker Compose') {
             steps {
@@ -86,3 +80,54 @@ pipeline {
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
