@@ -16,9 +16,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class DebrisTrackerApplication {
 
 public static void main(String[] args) {
-
-
-
     SpringApplication.run(DebrisTrackerApplication.class, args);
     System.out.println("DB USER: " + System.getenv("MYSQL_USERNAME"));
 
