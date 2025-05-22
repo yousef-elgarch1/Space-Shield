@@ -14,12 +14,7 @@ WORKDIR /app
 # Install only the static file server
 RUN npm install -g serve                         # tiny footprint, zero config :contentReference[oaicite:2]{index=2}
 # Check if serve exists; install only if missing
-RUN if ! command -v serve >/dev/null 2>&1; then \
-    echo "serve not found, installing…"; \
-    npm install -g serve; \
-    else \
-    echo "serve already installed, skipping"; \
-    fi
+
 
 # Copy built assets
 COPY --from=builder /app/dist ./dist
