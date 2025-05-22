@@ -8,12 +8,10 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                git branch: 'devops',
-                    credentialsId: 'github-pat',
-                    url: 'https://github.com/m-elhamlaoui/development-platform-team-ahsan-nas.git'
+                // This uses the Git config (branch, URL, credentials) from Jenkins UI
+                checkout scm
             }
         }
 
@@ -29,7 +27,7 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 dir("${FRONTEND_DIR}") {
-                    sh 'npm ci'      // more reliable for CI than npm install
+                    sh 'npm ci'
                     sh 'npm run build'
                 }
             }
@@ -52,7 +50,7 @@ pipeline {
 
         stage('Health Check') {
             steps {
-                sh 'sleep 10' // give time for services to warm up
+                sh 'sleep 10' // Wait for services to be ready
                 sh 'curl --fail http://localhost:8080 || exit 1'
                 sh 'curl --fail http://localhost:3001 || exit 1'
             }
