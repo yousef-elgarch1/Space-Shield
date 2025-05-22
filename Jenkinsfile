@@ -11,7 +11,9 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git credentialsId: 'github-pat', url: 'https://github.com/m-elhamlaoui/development-platform-team-ahsan-nas.git'
+                git branch: 'devops',
+                    credentialsId: 'github-pat',
+                    url: 'https://github.com/m-elhamlaoui/development-platform-team-ahsan-nas.git'
             }
         }
 
@@ -27,7 +29,7 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 dir("${FRONTEND_DIR}") {
-                    sh 'npm install'
+                    sh 'npm ci'      // more reliable for CI than npm install
                     sh 'npm run build'
                 }
             }
@@ -50,6 +52,7 @@ pipeline {
 
         stage('Health Check') {
             steps {
+                sh 'sleep 10' // give time for services to warm up
                 sh 'curl --fail http://localhost:8080 || exit 1'
                 sh 'curl --fail http://localhost:3001 || exit 1'
             }
@@ -58,7 +61,7 @@ pipeline {
 
     post {
         always {
-            echo 'Cleaning up containers...'
+            echo '🧹 Cleaning up containers...'
             sh 'docker compose down --volumes || true'
         }
     }
