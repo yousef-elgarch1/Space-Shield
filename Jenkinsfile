@@ -4,7 +4,7 @@ pipeline {
     environment {
         COMPOSE_FILE = 'docker-compose.yml'
         BACKEND_DIR = 'backend'
-        FRONTEND_DIR = 'frontend'
+        FRONTEND_DIR = 'Frontend'
     }
 
     stages {
