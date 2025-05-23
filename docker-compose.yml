@@ -39,7 +39,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    build: ./frontend
+    build: ./Frontend
     container_name: vite-frontend
     depends_on:
       - backend
