@@ -80,13 +80,23 @@ pipeline {
             }
         }
 
-        stage('Health Check') {
-            steps {
-                sh 'sleep 10'  // wait for services to come up
-                sh 'curl --fail http://localhost:8080 || exit 1'
-                sh 'curl --fail http://localhost:3001 || exit 1'
-            }
+     stage('Health Check') {
+       steps {
+         sh 'sleep 10'
+
+    // Backend health (inside container uses its own localhost:8080)
+        sh '''
+          docker compose exec backend \
+           curl --fail http://localhost:8080/actuator/health || exit 1
+         '''
+
+       // Frontend health (inside container uses its own localhost:3000)
+        sh '''
+          docker compose exec frontend \
+           curl --fail http://localhost:3000 || exit 1
+         '''
         }
+    }
     }
 
     post {
