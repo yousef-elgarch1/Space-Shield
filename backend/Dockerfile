@@ -1,23 +1,20 @@
+# backend/Dockerfile
+
+# 1. Base JDK image
 FROM eclipse-temurin:21-jdk-alpine
 
+# 2. Workdir
 WORKDIR /app
 
-# Install netcat to allow port checking
-RUN apk add --no-cache netcat-openbsd
-
-# Copy Spring Boot jar and wait script
+# 3. Copy in the built JAR
 COPY target/*.jar app.jar
-COPY wait-for.sh .
 
-# Make the wait script executable
-RUN chmod +x wait-for.sh
+# 4. Expose the port your Spring app listens on
+EXPOSE 8080
 
-# Expose application port
-EXPOSE 8081
-
-# Optional default values for DB host/port (can be overridden in compose/env)
-ENV DB_HOST=mysql-container
+# 5. Default env-vars pointing at MySQL service on the bridge network
+ENV DB_HOST=mysql
 ENV DB_PORT=3306
 
-# Use wait-for script as entrypoint
-ENTRYPOINT ["sh", "./wait-for.sh"]
+# 6. Run your Spring Boot application as PID 1
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

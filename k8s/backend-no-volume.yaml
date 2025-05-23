@@ -1,0 +1,95 @@
+# Create k8s/backend-no-volume.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  namespace: spaceshield
+  labels:
+    app: backend
+spec:
+  replicas: 1  # Start with 1 replica
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: spaceshield-backend:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: spaceshield-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: spaceshield-config
+              key: DB_PORT
+        - name: MYSQL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: spaceshield-secrets
+              key: MYSQL_USERNAME
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: spaceshield-secrets
+              key: MYSQL_PASSWORD
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: spaceshield-config
+              key: MYSQL_DATABASE
+        - name: SPACE_TRACK_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: spaceshield-secrets
+              key: SPACE_TRACK_USERNAME
+        - name: SPACE_TRACK_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: spaceshield-secrets
+              key: SPACE_TRACK_PASSWORD
+        # Remove orekit volume mount temporarily
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        # Simplified health checks
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: spaceshield
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: ClusterIP
