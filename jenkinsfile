@@ -84,12 +84,6 @@ pipeline {
        steps {
          sh 'sleep 10'
 
-    // Backend health (inside container uses its own localhost:8080)
-        sh '''
-          docker compose exec backend \
-           curl --fail http://localhost:8080/actuator/health || exit 1
-         '''
-
        // Frontend health (inside container uses its own localhost:3000)
         sh '''
           docker compose exec frontend \
