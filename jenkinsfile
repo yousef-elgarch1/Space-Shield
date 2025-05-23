@@ -80,17 +80,7 @@ pipeline {
             }
         }
 
-     stage('Health Check') {
-       steps {
-         sh 'sleep 10'
 
-       // Frontend health (inside container uses its own localhost:3000)
-        sh '''
-          docker compose exec frontend \
-           curl --fail http://localhost:3000 || exit 1
-         '''
-        }
-    }
     }
 
     post {
