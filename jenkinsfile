@@ -15,7 +15,9 @@ pipeline {
 
     stages {
         stage('Checkout') {
-            steps { checkout scm }
+            steps {
+                checkout scm
+            }
         }
 
         stage('Build Backend') {
@@ -37,11 +39,20 @@ pipeline {
             }
         }
 
-
+        stage('Install Docker Compose Plugin') {
+            steps {
+                sh '''
+                  mkdir -p ~/.docker/cli-plugins
+                  curl -SL https://github.com/docker/compose/releases/download/v2.6.0/docker-compose-linux-x86_64 \
+                    -o ~/.docker/cli-plugins/docker-compose
+                  chmod +x ~/.docker/cli-plugins/docker-compose
+                  docker compose version
+                '''
+            }
+        }
 
         stage('Build & Run Docker Compose') {
             steps {
-                // bind your sensitive credentials from Jenkins
                 withCredentials([
                   usernamePassword(
                     credentialsId: 'spacetrack-creds',
@@ -59,15 +70,14 @@ pipeline {
                   )
                 ]) {
                   sh 'docker compose down -v || true'
-                  sh 'docker compose build '
-                  sh 'docker compose up -d'
+                  sh 'docker compose up --build -d'
                 }
             }
         }
 
         stage('Health Check') {
             steps {
-                sh 'sleep 10' // wait for services
+                sh 'sleep 10'  // wait for services to come up
                 sh 'curl --fail http://localhost:8080 || exit 1'
                 sh 'curl --fail http://localhost:3001 || exit 1'
             }
@@ -81,54 +91,3 @@ pipeline {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
