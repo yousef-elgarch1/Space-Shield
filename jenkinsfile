@@ -69,8 +69,13 @@ pipeline {
                     variable: 'MYSQL_ROOT_PASSWORD'
                   )
                 ]) {
-                  sh 'docker compose down -v || true'
-                  sh 'docker compose up --build -d'
+                 // 1) Stop & remove ONLY these three containers by name
+                 sh 'docker stop mysql-container spring-backend vite-frontend || true'
+                 sh 'docker rm   mysql-container spring-backend vite-frontend || true'
+
+      // 2) Rebuild images and bring up the entire stack (minus Jenkins)
+                 sh 'docker compose build'
+                 sh 'docker compose up -d mysql backend frontend'
                 }
             }
         }
