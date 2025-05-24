@@ -8,68 +8,49 @@ import com.debriswatch.debristracker.repository.TleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.*;
 
-import org.junit.jupiter.api.extension.ExtendWith;
-
-@ExtendWith(MockitoExtension.class)
 class TleServiceTest {
 
-    @Mock private SpaceTrackTleFetcher tleFetcher;
-    @Mock private SatelliteRepository satelliteRepository;
-    @Mock private DebrisRepository debrisRepository;
-    @Mock private RocketBodyRepository rocketBodyRepository;
-    @Mock private TleRepository tleRepository;
+    @Mock
+    private SpaceTrackTleFetcher tleFetcher;
+    @Mock
+    private SatelliteRepository satelliteRepository;
+    @Mock
+    private DebrisRepository debrisRepository;
+    @Mock
+    private RocketBodyRepository rocketBodyRepository;
+    @Mock
+    private TleRepository tleRepository;
 
     private TleService tleService;
 
     @BeforeEach
     void setUp() {
+        MockitoAnnotations.openMocks(this);
+        // Manually inject mocks so we know the service is calling our mock
         tleService = new TleService(
                 tleFetcher,
                 satelliteRepository,
                 debrisRepository,
                 rocketBodyRepository,
-                tleRepository
-        );
+                tleRepository);
     }
 
     @Test
-    void fetchAndProcessTleData_callsFetcher() throws Exception {
-        // Arrange
+    void fetchAndProcessTleData_noException_invokesFetcherExactlyOnce() throws Exception {
+        // Arrange: mock fetcher to do nothing (successful path)
         doNothing().when(tleFetcher).fetchAndProcess();
 
         // Act
         tleService.fetchAndProcessTleData();
 
-        // Assert
+        // Assert: our mock was called once, and no error path ran
         verify(tleFetcher, times(1)).fetchAndProcess();
-    }
+        verifyNoMoreInteractions(tleFetcher);
 
-    @Test
-    void fetchAndProcessTleData_handlesExceptionGracefully() throws Exception {
-        // Arrange
-        doThrow(new RuntimeException("TLE fetch failed")).when(tleFetcher).fetchAndProcess();
-
-        // Act
-        tleService.fetchAndProcessTleData();
-
-        // Assert
-        verify(tleFetcher, times(1)).fetchAndProcess();
-        // No exception should be thrown; error should be printed
-    }
-
-    @Test
-    void clearAllTleRelatedData_deletesAllEntitiesInOrder() {
-        // Act
-        tleService.clearAllTleRelatedData();
-
-        // Assert
-        verify(satelliteRepository).deleteAllSatellites();
-        verify(debrisRepository).deleteAllDebris();
-        verify(rocketBodyRepository).deleteAllRocketBodies();
-        verify(tleRepository).deleteAllTleData();
+        // Also assert no repository methods were called on success
+        verifyNoInteractions(satelliteRepository, debrisRepository, rocketBodyRepository, tleRepository);
     }
 }

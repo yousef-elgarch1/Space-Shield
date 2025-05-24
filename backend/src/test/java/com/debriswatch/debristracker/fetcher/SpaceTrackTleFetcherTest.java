@@ -15,15 +15,22 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 
 class SpaceTrackTleFetcherTest {
- 
-    @Mock private SatelliteRepository satelliteRepo;
-    @Mock private DebrisRepository debrisRepo;
-    @Mock private RocketBodyRepository rocketRepo;
-    @Mock private TleRepository tleRepo;
-    @Mock private TleObjectFactory tleObjectFactory;
-    @Mock private Dotenv dotenv;
 
-    @InjectMocks private SpaceTrackTleFetcher fetcher;
+    @Mock
+    private SatelliteRepository satelliteRepo;
+    @Mock
+    private DebrisRepository debrisRepo;
+    @Mock
+    private RocketBodyRepository rocketRepo;
+    @Mock
+    private TleRepository tleRepo;
+    @Mock
+    private TleObjectFactory tleObjectFactory;
+    @Mock
+    private Dotenv dotenv;
+
+    @InjectMocks
+    private SpaceTrackTleFetcher fetcher;
 
     @BeforeEach
     void setup() {
