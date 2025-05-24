@@ -40,15 +40,6 @@ pipeline {
                 }
             }
         }
-        stage('Build Docker Images') {
-            steps {
-                script {
-                    // Build images with latest tag
-                    sh 'docker build -t spaceshield-backend:latest ./backend'
-                    sh 'docker build -t spaceshield-frontend:latest ./Frontend'
-                }
-            }
-        }
         stage('Deploy to Kubernetes') {
             steps {
                 withCredentials([

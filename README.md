@@ -110,10 +110,3 @@ This project is licensed under the MIT License.
 
 ---
 
-<!-- 
-Git commands to add, commit, and push this README update:
-
-git add README.md
-git commit -m "Add detailed README for DevOps pipeline with Jenkins, Docker, Kubernetes, Grafana, and Prometheus"
-git push
--->
