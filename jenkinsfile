@@ -38,7 +38,13 @@ pipeline {
                 }
             }
         }
-
+        stage('Test Backend') {
+            steps {
+                dir("${BACKEND_DIR}") {
+                    sh './mvnw test'
+                }
+            }
+        }
         stage('Install Docker Compose Plugin') {
             steps {
                 sh '''
@@ -90,7 +96,3 @@ pipeline {
         }
     }
 }
-
-
-
-

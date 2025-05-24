@@ -1,0 +1,32 @@
+# ConfigMap for non-sensitive data
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spaceshield-config
+  namespace: spaceshield
+data:
+  # MySQL Configuration
+  MYSQL_DATABASE: "spaceshielddb"
+  DB_HOST: "mysql-service"
+  DB_PORT: "3306"
+  
+  # Orekit Configuration
+  OREKIT_PATH: "/app/orekit-data"
+
+---
+# Secret for sensitive data
+apiVersion: v1
+kind: Secret
+metadata:
+  name: spaceshield-secrets
+  namespace: spaceshield
+type: Opaque
+stringData:
+  # MySQL Credentials
+  MYSQL_ROOT_PASSWORD: "P0kpok1010*/"
+  MYSQL_USERNAME: "root"
+  MYSQL_PASSWORD: "P0kpok1010*/"
+  
+  # Space Track API Credentials
+  SPACE_TRACK_USERNAME: "professionelproaw201@gmail.com"
+  SPACE_TRACK_PASSWORD: "Password123456789"

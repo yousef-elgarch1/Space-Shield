@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  namespace: spaceshield
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      initContainers:
+      - name: wait-for-mysql
+        image: mysql:8.4
+        command: ['sh', '-c']
+        args:
+          - |
+            until mysqladmin ping -h mysql-service -u root -pyoussef --silent; do
+              echo "Waiting for MySQL to be ready..."
+              sleep 5
+            done
+            echo "MySQL is ready!"
+      containers:
+      - name: backend
+        image: spaceshield-backend:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        env:
+        # Override database connection
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://mysql-service:3306/spaceshielddb"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "root"
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "youssef"
+        
+        # Other environment variables
+        - name: DB_HOST
+          value: "mysql-service"
+        - name: DB_PORT
+          value: "3306"
+        - name: MYSQL_USERNAME
+          value: "root"
+        - name: MYSQL_PASSWORD
+          value: "youssef"
+        - name: MYSQL_DATABASE
+          value: "spaceshielddb"
+        - name: SPACE_TRACK_USERNAME
+          value: "professionelproaw201@gmail.com"
+        - name: SPACE_TRACK_PASSWORD
+          value: "Password123456789"
+        - name: OREKIT_PATH
+          value: "/app/orekit-data"
+        
+        volumeMounts:
+        - name: orekit-data
+          mountPath: /app/orekit-data
+          readOnly: true
+        
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 30
+        
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 90
+          periodSeconds: 10
+      
+      volumes:
+      - name: orekit-data
+        configMap:
+          name: orekit-data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: spaceshield
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: ClusterIP

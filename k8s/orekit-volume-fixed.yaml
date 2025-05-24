@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: orekit-data-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadOnlyMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  claimRef:
+    namespace: spaceshield
+    name: orekit-data-pvc
+  hostPath:
+    path: /host_mnt/orekit-data-main
+    type: DirectoryOrCreate
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: orekit-data-pvc
+  namespace: spaceshield
+spec:
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: ""
+  volumeName: orekit-data-pv
+  resources:
+    requests:
+      storage: 1Gi
