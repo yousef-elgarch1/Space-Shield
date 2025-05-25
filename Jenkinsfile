@@ -17,23 +17,26 @@ pipeline {
             }
         }
 
-        stage('Setup Helm') {
-            steps {
-                sh '''
-                echo "🔧 Setting up Helm in Jenkins..."
-                if [ ! -f "${HELM_PATH}" ]; then
-                    echo "📥 Downloading Helm..."
-                    curl -fsSL https://get.helm.sh/helm-v3.12.0-linux-amd64.tar.gz | tar -xzf - -C /tmp
-                    mv /tmp/linux-amd64/helm ${HELM_PATH}
-                    chmod +x ${HELM_PATH}
-                    echo "✅ Helm installed successfully"
-                else
-                    echo "✅ Helm already installed"
-                fi
-                ${HELM_PATH} version --short
-                '''
-            }
-        }
+stage('Setup Helm') {
+    steps {
+        sh '''
+        echo "🔧 Setting up Helm in Jenkins..."
+        HELM_PATH=/var/jenkins_home/helm
+        echo "Using HELM_PATH: ${HELM_PATH}"
+        
+        if [ ! -f "${HELM_PATH}" ]; then
+            echo "📥 Downloading Helm..."
+            curl -fsSL https://get.helm.sh/helm-v3.12.0-linux-amd64.tar.gz | tar -xzf - -C /tmp
+            mv /tmp/linux-amd64/helm ${HELM_PATH}
+            chmod +x ${HELM_PATH}
+            echo "✅ Helm installed successfully"
+        else
+            echo "✅ Helm already installed"
+        fi
+        ${HELM_PATH} version --short
+        '''
+    }
+}
         stage('Build Backend') {
             steps {
                 dir("${BACKEND_DIR}") {
