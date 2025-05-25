@@ -92,21 +92,22 @@ stage('Deploy to Kubernetes') {
         }
     }
 }
-        stage('Verify Deployment') {
-            steps {
-                sh '''
-                echo "📊 Checking deployment status..."
-                kubectl get pods -n spaceshield
-                kubectl get svc -n spaceshield
-                
-                echo "🔍 Checking backend health..."
-                kubectl get pods -l app=backend -n spaceshield
-                
-                echo "🔍 Checking frontend status..."
-                kubectl get pods -l app=frontend -n spaceshield
-                '''
-            }
-        }
+stage('Verify Deployment') {
+    steps {
+        sh '''
+        echo "📊 Checking deployment status..."
+        KUBECTL=/var/jenkins_home/kubectl
+        ${KUBECTL} get pods -n spaceshield
+        ${KUBECTL} get svc -n spaceshield
+        
+        echo "🔍 Checking backend health..."
+        ${KUBECTL} get pods -l app=backend -n spaceshield
+        
+        echo "🔍 Checking frontend status..."
+        ${KUBECTL} get pods -l app=frontend -n spaceshield
+        '''
+    }
+}
         stage('Test Endpoints') {
             steps {
                 sh '''
@@ -119,25 +120,25 @@ stage('Deploy to Kubernetes') {
             }
         }
     }
-    post {
-        success {
-            echo '🎉 Deployment successful! SpaceShield is ready.'
-            sh '''
-            echo "📋 Access your application:"
-            echo "Frontend: http://localhost:30001"
-            echo "Backend API: kubectl port-forward service/backend 8080:8080 -n spaceshield"
-            '''
-        }
-        failure {
-            echo '❌ Deployment failed. Rolling back...'
-            sh '''
-            kubectl rollout undo deployment/backend -n spaceshield || true
-            kubectl rollout undo deployment/frontend -n spaceshield || true
-            '''
-        }
-        always {
-            echo '🧹 Pipeline completed.'
-            // Remove the Docker Compose cleanup since we're using K8s
-        }
+post {
+    success {
+        echo '🎉 Deployment successful! SpaceShield is ready.'
+        sh '''
+        echo "📋 Access your application:"
+        echo "Frontend: http://localhost:30001"
+        echo "Backend API: kubectl port-forward service/backend 8080:8080 -n spaceshield"
+        '''
     }
+    failure {
+        echo '❌ Deployment failed. Rolling back...'
+        sh '''
+        KUBECTL=/var/jenkins_home/kubectl
+        ${KUBECTL} rollout undo deployment/backend -n spaceshield || true
+        ${KUBECTL} rollout undo deployment/frontend -n spaceshield || true
+        '''
+    }
+    always {
+        echo '🧹 Pipeline completed.'
+    }
+}
 }
