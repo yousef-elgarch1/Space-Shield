@@ -9,6 +9,8 @@ pipeline {
         DB_HOST         = 'mysql'  // Changed to K8s service name
         DB_PORT         = '3306'   // Changed to internal port
         MYSQL_DATABASE  = 'spaceshielddb'
+        HELM_PATH = '/var/jenkins_home/helm'
+
     }
     stages {
         stage('Checkout') {
@@ -113,40 +115,47 @@ stage('Deploy to Kubernetes') {
         }
     }
 }
-        stage('Deploy Monitoring Stack') {
-            steps {
-                sh '''
-                echo "📊 Deploying Prometheus Monitoring Stack..."
-                
-                KUBECTL=/var/jenkins_home/kubectl
-                HELM=${HELM_PATH}
-                
-                # Add Prometheus Helm repo
-                ${HELM} repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
-                ${HELM} repo update
-                
-                # Check if monitoring already exists
-                if ${HELM} list -n spaceshield | grep -q "spaceshield-monitoring"; then
-                    echo "🔄 Upgrading existing monitoring stack..."
-                    ${HELM} upgrade spaceshield-monitoring prometheus-community/kube-prometheus-stack \
-                        --namespace spaceshield \
-                        --values k8s/monitoring-values.yaml \
-                        --wait --timeout=600s
-                else
-                    echo "🆕 Installing new monitoring stack..."
-                    ${HELM} install spaceshield-monitoring prometheus-community/kube-prometheus-stack \
-                        --namespace spaceshield \
-                        --values k8s/monitoring-values.yaml \
-                        --wait --timeout=600s
-                fi
-                
-                # Apply ServiceMonitor for backend
-                ${KUBECTL} apply -f k8s/backend-servicemonitor.yaml
-                
-                echo "✅ Monitoring stack deployed successfully!"
-                '''
-            }
-        }
+    stage('Deploy Monitoring Stack') {
+    steps {
+        sh '''
+        echo "📊 Deploying Prometheus Monitoring Stack..."
+        
+        KUBECTL=/var/jenkins_home/kubectl
+        
+        echo "Checking if Helm exists..."
+        ls -la /var/jenkins_home/helm || echo "Helm not found!"
+        
+        # Add Prometheus Helm repo
+        /var/jenkins_home/helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
+        /var/jenkins_home/helm repo update
+        
+        # Check if monitoring already exists
+        if /var/jenkins_home/helm list -n spaceshield | grep -q "spaceshield-monitoring"; then
+            echo "🔄 Upgrading existing monitoring stack..."
+            /var/jenkins_home/helm upgrade spaceshield-monitoring prometheus-community/kube-prometheus-stack \
+                --namespace spaceshield \
+                --values k8s/monitoring-values.yaml \
+                --wait --timeout=600s
+        else
+            echo "🆕 Installing new monitoring stack..."
+            /var/jenkins_home/helm install spaceshield-monitoring prometheus-community/kube-prometheus-stack \
+                --namespace spaceshield \
+                --values k8s/monitoring-values.yaml \
+                --wait --timeout=600s
+        fi
+        
+        # Apply ServiceMonitor for backend (if file exists)
+        if [ -f "k8s/backend-servicemonitor.yaml" ]; then
+            ${KUBECTL} apply -f k8s/backend-servicemonitor.yaml
+            echo "✅ ServiceMonitor applied"
+        else
+            echo "⚠️ ServiceMonitor file not found, skipping..."
+        fi
+        
+        echo "✅ Monitoring stack deployed successfully!"
+        '''
+    }
+}
 stage('Verify Deployment') {
     steps {
         sh '''
