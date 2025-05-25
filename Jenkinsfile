@@ -40,52 +40,58 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Kubernetes') {
-            steps {
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'spacetrack-creds',
-                        usernameVariable: 'SPACE_TRACK_USERNAME',
-                        passwordVariable: 'SPACE_TRACK_PASSWORD'
-                    ),
-                    usernamePassword(
-                        credentialsId: 'mysql-creds',
-                        usernameVariable: 'MYSQL_USERNAME',
-                        passwordVariable: 'MYSQL_PASSWORD'
-                    ),
-                    string(
-                        credentialsId: 'mysql-root-password',
-                        variable: 'MYSQL_ROOT_PASSWORD'
-                    )
-                ]) {
-                    sh '''
-                    echo "🚀 Deploying to Kubernetes namespace: spaceshield"
-                    
-                    # Update backend deployment with new image and environment
-                    kubectl set image deployment/backend backend=spaceshield-backend:latest -n spaceshield
-                    kubectl set env deployment/backend SPACE_TRACK_USERNAME=${SPACE_TRACK_USERNAME} -n spaceshield
-                    kubectl set env deployment/backend SPACE_TRACK_PASSWORD=${SPACE_TRACK_PASSWORD} -n spaceshield
-                    kubectl set env deployment/backend MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} -n spaceshield
-                    kubectl set env deployment/backend DB_HOST=mysql -n spaceshield
-                    kubectl set env deployment/backend DB_PORT=3306 -n spaceshield
-                    kubectl set env deployment/backend MYSQL_DATABASE=spaceshielddb -n spaceshield
-                    
-                    # Update frontend deployment with new image and API URL
-                    kubectl set image deployment/frontend frontend=spaceshield-frontend:latest -n spaceshield
-                    kubectl set env deployment/frontend REACT_APP_API_URL="http://backend:8080" -n spaceshield
-                    
-                    # Wait for deployments to complete
-                    echo "⏳ Waiting for backend deployment..."
-                    kubectl rollout status deployment/backend -n spaceshield --timeout=300s
-                    
-                    echo "⏳ Waiting for frontend deployment..."
-                    kubectl rollout status deployment/frontend -n spaceshield --timeout=300s
-                    
-                    echo "✅ Deployment completed successfully!"
-                    '''
-                }
-            }
+stage('Deploy to Kubernetes') {
+    steps {
+        withCredentials([
+            usernamePassword(
+                credentialsId: 'spacetrack-creds',
+                usernameVariable: 'SPACE_TRACK_USERNAME',
+                passwordVariable: 'SPACE_TRACK_PASSWORD'
+            ),
+            usernamePassword(
+                credentialsId: 'mysql-creds',
+                usernameVariable: 'MYSQL_USERNAME',
+                passwordVariable: 'MYSQL_PASSWORD'
+            ),
+            string(
+                credentialsId: 'mysql-root-password',
+                variable: 'MYSQL_ROOT_PASSWORD'
+            )
+        ]) {
+            sh '''
+            echo "🚀 Deploying to Kubernetes namespace: spaceshield"
+            
+            # Define kubectl path
+            KUBECTL=/var/jenkins_home/kubectl
+            
+            # Update backend deployment environment (skip image update since we're not building new images)
+            ${KUBECTL} set env deployment/backend SPACE_TRACK_USERNAME=${SPACE_TRACK_USERNAME} -n spaceshield
+            ${KUBECTL} set env deployment/backend SPACE_TRACK_PASSWORD=${SPACE_TRACK_PASSWORD} -n spaceshield
+            ${KUBECTL} set env deployment/backend MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} -n spaceshield
+            ${KUBECTL} set env deployment/backend DB_HOST=mysql -n spaceshield
+            ${KUBECTL} set env deployment/backend DB_PORT=3306 -n spaceshield
+            ${KUBECTL} set env deployment/backend MYSQL_DATABASE=spaceshielddb -n spaceshield
+            
+            # Update frontend deployment and API URL
+            ${KUBECTL} set env deployment/frontend REACT_APP_API_URL="http://backend:8080" -n spaceshield
+            
+            # Restart deployments to apply changes
+            echo "🔄 Restarting deployments..."
+            ${KUBECTL} rollout restart deployment/backend -n spaceshield
+            ${KUBECTL} rollout restart deployment/frontend -n spaceshield
+            
+            # Wait for deployments to complete
+            echo "⏳ Waiting for backend deployment..."
+            ${KUBECTL} rollout status deployment/backend -n spaceshield --timeout=300s
+            
+            echo "⏳ Waiting for frontend deployment..."
+            ${KUBECTL} rollout status deployment/frontend -n spaceshield --timeout=300s
+            
+            echo "✅ Deployment completed successfully!"
+            '''
         }
+    }
+}
         stage('Verify Deployment') {
             steps {
                 sh '''
