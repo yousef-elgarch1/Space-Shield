@@ -83,7 +83,7 @@
             <version>3.0.0</version>
         </dependency>
         <!-- Add these monitoring dependencies -->
-<dependency>
+        <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-actuator</artifactId>
 </dependency>

@@ -11,11 +11,11 @@ spec:
     matchLabels:
       app: backend
   endpoints:
-  - port: management
+  - port: http
     path: /actuator/prometheus
     interval: 30s
 ---
-# Service to expose backend monitoring port
+# Update service to use port 8080 for monitoring
 apiVersion: v1
 kind: Service
 metadata:
@@ -25,8 +25,8 @@ metadata:
     app: backend
 spec:
   ports:
-  - name: management
-    port: 8081
-    targetPort: 8081
+  - name: http
+    port: 8080
+    targetPort: 8080
   selector:
     app: backend
