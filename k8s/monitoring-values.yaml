@@ -1,80 +1,24 @@
-# SpaceShield Monitoring Configuration
 nameOverride: "spaceshield-monitoring"
 
-# Prometheus Configuration
 prometheus:
-  prometheusSpec:
-    storageSpec:
-      volumeClaimTemplate:
-        spec:
-          storageClassName: standard
-          accessModes: ["ReadWriteOnce"]
-          resources:
-            requests:
-              storage: 5Gi
-    retention: 7d
-    serviceMonitorSelectorNilUsesHelmValues: false
-    podMonitorSelectorNilUsesHelmValues: false
-    ruleSelectorNilUsesHelmValues: false
-  
   service:
     type: NodePort
-    nodePort: 30091
+    # Remove nodePort line - Kubernetes will auto-assign
 
-# Grafana Configuration  
 grafana:
   enabled: true
   adminPassword: "spaceshield123"
-  
   service:
     type: NodePort
-    nodePort: 30302
-  
-  # Pre-built dashboards
-  dashboards:
-    default:
-      spring-boot:
-        gnetId: 12900
-        revision: 1
-        datasource: Prometheus
-      
-      jvm-micrometer:
-        gnetId: 4701
-        revision: 7
-        datasource: Prometheus
+    # Remove nodePort line - Kubernetes will auto-assign
 
-# AlertManager Configuration
 alertmanager:
-  alertmanagerSpec:
-    storage:
-      volumeClaimTemplate:
-        spec:
-          storageClassName: standard
-          accessModes: ["ReadWriteOnce"]
-          resources:
-            requests:
-              storage: 2Gi
-
   service:
     type: NodePort
-    nodePort: 30093
+    # Remove nodePort line - Kubernetes will auto-assign
 
-# Enable monitoring components
 nodeExporter:
   enabled: true
 
 kubeStateMetrics:
   enabled: true
-
-defaultRules:
-  create: true
-  rules:
-    alertmanager: true
-    general: true
-    k8s: true
-    kubeApiserver: true
-    kubelet: true
-    kubernetesApps: true
-    kubernetesResources: true
-    node: true
-    prometheus: true
