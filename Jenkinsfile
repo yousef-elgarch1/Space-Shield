@@ -16,6 +16,21 @@ pipeline {
                 checkout scm
             }
         }
+
+        stage('Setup Helm') {
+            steps {
+                sh '''
+                echo "🔧 Setting up Helm in Jenkins..."
+                if [ ! -f ${HELM_PATH} ]; then
+                    echo "📥 Downloading Helm..."
+                    curl -fsSL https://get.helm.sh/helm-v3.12.0-linux-amd64.tar.gz | tar -xzf - -C /tmp
+                    mv /tmp/linux-amd64/helm ${HELM_PATH}
+                    chmod +x ${HELM_PATH}
+                fi
+                ${HELM_PATH} version --short
+                '''
+            }
+        }
         stage('Build Backend') {
             steps {
                 dir("${BACKEND_DIR}") {
@@ -92,6 +107,40 @@ stage('Deploy to Kubernetes') {
         }
     }
 }
+        stage('Deploy Monitoring Stack') {
+            steps {
+                sh '''
+                echo "📊 Deploying Prometheus Monitoring Stack..."
+                
+                KUBECTL=/var/jenkins_home/kubectl
+                HELM=${HELM_PATH}
+                
+                # Add Prometheus Helm repo
+                ${HELM} repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
+                ${HELM} repo update
+                
+                # Check if monitoring already exists
+                if ${HELM} list -n spaceshield | grep -q "spaceshield-monitoring"; then
+                    echo "🔄 Upgrading existing monitoring stack..."
+                    ${HELM} upgrade spaceshield-monitoring prometheus-community/kube-prometheus-stack \
+                        --namespace spaceshield \
+                        --values k8s/monitoring-values.yaml \
+                        --wait --timeout=600s
+                else
+                    echo "🆕 Installing new monitoring stack..."
+                    ${HELM} install spaceshield-monitoring prometheus-community/kube-prometheus-stack \
+                        --namespace spaceshield \
+                        --values k8s/monitoring-values.yaml \
+                        --wait --timeout=600s
+                fi
+                
+                # Apply ServiceMonitor for backend
+                ${KUBECTL} apply -f k8s/backend-servicemonitor.yaml
+                
+                echo "✅ Monitoring stack deployed successfully!"
+                '''
+            }
+        }
 stage('Verify Deployment') {
     steps {
         sh '''
@@ -127,6 +176,9 @@ post {
         echo "📋 Access your application:"
         echo "Frontend: http://localhost:30001"
         echo "Backend API: kubectl port-forward service/backend 8080:8080 -n spaceshield"
+                    echo "📊 Grafana: http://localhost:30302 (admin/spaceshield123)"
+            echo "📈 Prometheus: http://localhost:30091"
+            echo "🚨 AlertManager: http://localhost:30093"
         '''
     }
     failure {
