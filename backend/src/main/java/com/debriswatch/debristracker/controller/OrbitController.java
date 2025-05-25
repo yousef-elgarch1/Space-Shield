@@ -18,6 +18,12 @@ import com.debriswatch.debristracker.repository.TleRepository;
 import com.debriswatch.debristracker.service.OrbitService;
 import com.debriswatch.debristracker.service.TleService;
 
+// 📊 ADD THESE IMPORTS FOR MONITORING
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+import org.springframework.beans.factory.annotation.Autowired;
+
+
 @RestController
 // adding the CrossOrigin annotation to allow requests from any origin- ELGARCH
                             // Youssef
@@ -28,6 +34,11 @@ public class OrbitController {
     private final OrbitService orbitService;
     private final TleRepository tleRepository;
     private final TleService tleservice;
+
+    // 📊 ADD MONITORING REGISTRY
+    @Autowired
+    private MeterRegistry meterRegistry;
+
     public OrbitController(OrbitService orbitService, TleRepository tleRepository,TleService tleservice) {
         this.orbitService = orbitService;
         this.tleRepository = tleRepository;
@@ -36,49 +47,133 @@ public class OrbitController {
 
     @GetMapping("/realtime")
     public List<OrbitResponseDto> getRealTimeOrbits() {
-        // tleservice.clearAllTleRelatedData(); // drop all existing data from the databse for optimisation
-        tleservice.fetchAndProcessTleData();   // fetch data and process it 
-        List<TleData> tleList = tleRepository.findLatestTlePerObjectName();   // find latest tle data per object 
-        return tleList.stream()
-                .map(tle -> {
-                    OrbitPoint point = orbitService.computeCurrentOrbitPoint(tle);
-                    if (point != null) {
-                        return new OrbitResponseDto(
-                                tle.getObjectName(),
-                                point.getLatitude(),
-                                point.getLongitude(),
-                                point.getAltitude()
-                        );
-                    } else {
-                        return null; 
-                    }
-                })
-                .filter(Objects::nonNull)
-                .toList();
+        Timer.Sample sample = Timer.start(meterRegistry);
+
+        try {
+            // 🛰️ Track real-time orbit requests
+            meterRegistry.counter("spaceshield.orbit.requests",
+                    "type", "realtime",
+                    "endpoint", "realtime").increment();
+
+            // Track TLE data fetch and processing
+            Timer.Sample fetchSample = Timer.start(meterRegistry);
+            tleservice.fetchAndProcessTleData();
+            fetchSample.stop(Timer.builder("spaceshield.tle.fetch.duration")
+                    .description("Time spent fetching and processing TLE data")
+                    .register(meterRegistry));
+
+            List<TleData> tleList = tleRepository.findLatestTlePerObjectName();
+
+            // Track orbital computations
+            Timer.Sample computeSample = Timer.start(meterRegistry);
+            List<OrbitResponseDto> result = tleList.stream()
+                    .map(tle -> {
+                        OrbitPoint point = orbitService.computeCurrentOrbitPoint(tle);
+                        if (point != null) {
+                            // Track successful orbital computation
+                            meterRegistry.counter("spaceshield.orbit.computed",
+                                    "object", tle.getObjectName(),
+                                    "status", "success").increment();
+                            return new OrbitResponseDto(
+                                    tle.getObjectName(),
+                                    point.getLatitude(),
+                                    point.getLongitude(),
+                                    point.getAltitude());
+                        } else {
+                            // Track failed orbital computation
+                            meterRegistry.counter("spaceshield.orbit.computed",
+                                    "object", tle.getObjectName(),
+                                    "status", "failed").increment();
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            computeSample.stop(Timer.builder("spaceshield.orbit.computation.duration")
+                    .description("Time spent computing current orbital positions")
+                    .register(meterRegistry));
+
+            // Track successful real-time orbit generation
+            meterRegistry.counter("spaceshield.orbit.success",
+                    "type", "realtime",
+                    "objects_computed", String.valueOf(result.size())).increment();
+
+            // Track current space objects being tracked in real-time
+            meterRegistry.gauge("spaceshield.realtime.objects", result.size());
+
+            return result;
+
+        } catch (Exception e) {
+            meterRegistry.counter("spaceshield.api.errors",
+                    "endpoint", "realtime",
+                    "error", e.getClass().getSimpleName()).increment();
+            throw e;
+        } finally {
+            sample.stop(Timer.builder("spaceshield.orbit.realtime.total.duration")
+                    .description("Total time for real-time orbit computation")
+                    .register(meterRegistry));
+        }
     }
 
-
-    /**
-     * Endpoint: /api/orbit/predict?objectName=EXPLORER%201&days=2
-     */
     @GetMapping("/predict")
     public ResponseEntity<List<OrbitPoint>> predictOrbit(
             @RequestParam String objectName,
-            @RequestParam(defaultValue = "1") int days
-    ) {
-        // Cap the max days for performance
-        if (days < 1 || days > 3) {
-            return ResponseEntity.badRequest().body(Collections.emptyList());
-        }
+            @RequestParam(defaultValue = "1") int days) {
+        Timer.Sample sample = Timer.start(meterRegistry);
 
-        // Fetch latest TLE for given object
-        TleData tle = tleRepository.findTopByObjectNameOrderByEpochDesc(objectName);
-        if (tle == null) {
-            return ResponseEntity.notFound().build();
-        }
+        try {
+            // 🛰️ Track orbit prediction requests
+            meterRegistry.counter("spaceshield.orbit.predictions",
+                    "object", objectName,
+                    "days", String.valueOf(days)).increment();
 
-        List<OrbitPoint> prediction = orbitService.predictOrbitForDays(tle, days);
-        return ResponseEntity.ok(prediction);
+            // Validate input parameters
+            if (days < 1 || days > 3) {
+                meterRegistry.counter("spaceshield.api.errors",
+                        "endpoint", "predict",
+                        "error", "invalid_days_parameter",
+                        "days", String.valueOf(days)).increment();
+                return ResponseEntity.badRequest().body(Collections.emptyList());
+            }
+
+            // Fetch latest TLE for given object
+            TleData tle = tleRepository.findTopByObjectNameOrderByEpochDesc(objectName);
+            if (tle == null) {
+                meterRegistry.counter("spaceshield.api.errors",
+                        "endpoint", "predict",
+                        "error", "object_not_found",
+                        "object", objectName).increment();
+                return ResponseEntity.notFound().build();
+            }
+
+            // Perform orbit prediction
+            Timer.Sample predictionSample = Timer.start(meterRegistry);
+            List<OrbitPoint> prediction = orbitService.predictOrbitForDays(tle, days);
+            predictionSample.stop(Timer.builder("spaceshield.orbit.prediction.duration")
+                    .description("Time spent predicting orbital trajectory")
+                    .tag("days", String.valueOf(days))
+                    .register(meterRegistry));
+
+            // Track successful predictions
+            meterRegistry.counter("spaceshield.orbit.prediction.success",
+                    "object", objectName,
+                    "days", String.valueOf(days),
+                    "points", String.valueOf(prediction.size())).increment();
+
+            return ResponseEntity.ok(prediction);
+
+        } catch (Exception e) {
+            meterRegistry.counter("spaceshield.api.errors",
+                    "endpoint", "predict",
+                    "error", e.getClass().getSimpleName(),
+                    "object", objectName).increment();
+            throw e;
+        } finally {
+            sample.stop(Timer.builder("spaceshield.orbit.predict.total.duration")
+                    .description("Total time for orbit prediction request")
+                    .register(meterRegistry));
+        }
     }
 }
 
